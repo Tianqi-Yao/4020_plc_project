@@ -12,23 +12,23 @@ public class CharStreamTest {
         System.out.println("initial chars 0 through 0123210?  " + lexer.peek("0", "1", "2", "3", "2", "1", "0"));
         
         
-        lexer = new Lexer("== 5;");
+        lexer = new Lexer("== 55;");
         System.out.println("test for ==, pass?  " + lexer.peek("=", "=") );
         if ( lexer.match("=","=") ) {
            // chars has private access in Lexer
            // so we can't actually perform this method call in
            // this sample test class, but you have the idea...
-            Token x = lexer.chars.emit(Token.Type.OPERATOR);
-            System.out.println(x.getIndex());
-            System.out.println(x.getLiteral());
-            System.out.println(x.getType());
+//            Token x = lexer.chars.emit(Token.Type.OPERATOR);
+//            System.out.println(x.getIndex());
+//            System.out.println(x.getLiteral());
+//            System.out.println(x.getType());
         }
         System.out.println("test for ' ', pass?  " + lexer.peek(" ") );
         if (lexer.match(" ")) {
-            Token x = lexer.chars.emit(Token.Type.STRING);
-            System.out.println(x.getIndex());
-            System.out.println(x.getLiteral());
-            System.out.println(x.getType());
+//            Token x = lexer.chars.emit(Token.Type.STRING);
+//            System.out.println(x.getIndex());
+//            System.out.println(x.getLiteral());
+//            System.out.println(x.getType());
         }
 
         System.out.println("current char digit?  " + lexer.peek("\\d") );

@@ -19,8 +19,7 @@ import java.util.List;
  */
 public final class Lexer {
 
-//    private final CharStream chars;
-    public final CharStream chars;
+    private final CharStream chars;
 
     public Lexer(String input) {
         chars = new CharStream(input);
@@ -32,18 +31,25 @@ public final class Lexer {
      */
     public List<Token> lex() {
         // Create empty List
-        List<Token> temp = new ArrayList<Token>();
+        List<Token> tokens = new ArrayList<Token>();
 
-        // Detect Whitespace
-        if (peek("[ \\\b\\\n\\\r\\\t]")) {
-            // CHANGE THE BELOW TO, SKIP!
-            System.out.println(chars.input);
-        }
-        else {
-            lexToken();
+        // FIGURE OUT HOW TO LOOP THIS  ///////////////////////// TODO
+        while (peek(".")) {
+            // Detect Whitespace
+            if (peek("[ \\\b\\\n\\\r\\\t]")) {
+                // CHANGE THE BELOW TO, SKIP!        --------------  TODO
+                chars.advance();
+                chars.skip();
+
+            }
+            else {
+                tokens.add(lexToken());
+            }
         }
 
-        return temp;
+        // END LOOP //////////////////////////////////////////////TODO
+
+        return tokens;
     }
 
     /**
@@ -55,44 +61,104 @@ public final class Lexer {
      * by {@link #lex()}
      */
     public Token lexToken() {
-        System.out.println("lexToken!"); // DEBUG DELETE ME // TODO
-
         // Identifier
-        if (peek("[A-Za-z_]")) {
-            lexIdentifier();
-        }
+        if (peek("[A-Za-z_]"))
+            return lexIdentifier();
 
         // Number
-        else if (peek(""))
+        else if (peek("[+\\-0-9]"))
+            return lexNumber();
 
+        // Character
+        else if (peek("'"))
+            return lexCharacter();
 
+        // String
+        else if (peek("\""))
+            return lexString();
 
-        throw new UnsupportedOperationException(); //TODO
-
+        // Operator
+        else
+            return lexOperator();
     }
 
     public Token lexIdentifier() {
-        throw new UnsupportedOperationException(); //TODO
+        while (peek("[A-Za-z_0-9]"))
+            match("[A-Za-z_0-9]");
+        return chars.emit(Token.Type.IDENTIFIER);
     }
 
     public Token lexNumber() {
-        throw new UnsupportedOperationException(); //TODO
+        if (peek("[+\\-]"))
+            match("[+\\-]");
+        while (peek("\\d"))
+            match("\\d");
+        if (peek(".", "\\d")) {
+            match(".");
+            while (peek("\\d"))
+                match("\\d");
+            return chars.emit(Token.Type.DECIMAL);
+        }
+        return chars.emit(Token.Type.INTEGER);
     }
 
     public Token lexCharacter() {
-        throw new UnsupportedOperationException(); //TODO
+        if (peek("'"))
+            match("'");
+        // Catch escape
+        if (peek("\\\\") && !peek("\\\\", "'"))
+            lexEscape();
+        else if (peek("[^'\\n\\r\\\\]"))                     ////// CHECK THIS TO SEE IF /n ALLOWED TODO
+            match("[^'\\n\\r\\\\]");
+        else
+            throw new ParseException("Illegal Character", chars.index);
+        if (peek("'")) {
+            match("'");
+            return chars.emit(Token.Type.CHARACTER);
+        }
+        throw new ParseException("Illegal Character", chars.index);
     }
 
     public Token lexString() {
-        throw new UnsupportedOperationException(); //TODO
+        if (peek("\""))
+            match("\"");
+        System.out.println("prewhile");
+        // String contents loop
+        while (peek("[^\"]")) {
+            System.out.println("while");
+            // match legal escape
+            if (peek("\\\\")) {
+                System.out.println("slash");
+                if (peek("\\\\", "[bt'\\\\]"))                    //////// CHECK TO SEE IF \n ALLOWED
+                    match("\\\\", "[bt'\\\\]");
+                else
+                    throw new ParseException("Illegal Escape", chars.index);
+            }
+            else
+                match(".");
+        }
+        System.out.println("postwhile");
+        if (peek("\""))
+            match("\"");
+        else
+            throw new ParseException("Unterminated String", chars.index);
+        System.out.println("bout_to_return");
+        return chars.emit(Token.Type.STRING);
     }
 
     public void lexEscape() {
-        throw new UnsupportedOperationException(); //TODO
+        if (peek("\\\\", "[bnrt'\"\\\\]"))
+            match("\\\\", "[bnrt'\"\\\\]");
+        else
+            throw new ParseException("Illegal Escape", chars.index);
     }
 
     public Token lexOperator() {
-        throw new UnsupportedOperationException(); //TODO
+        if (peek("[<>!=]", "="))
+            match("[<>!=]", "=");
+        else
+            match(".");
+        return chars.emit(Token.Type.OPERATOR);
     }
 
     /**
