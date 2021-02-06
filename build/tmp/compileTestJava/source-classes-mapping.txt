@@ -1,6 +1,6 @@
 plc/homework/RegexTests.java
  plc.homework.RegexTests
-plc/project/LexerTests.java
- plc.project.LexerTests
 plc/project/CharStreamTest.java
  plc.project.CharStreamTest
+plc/project/LexerTests.java
+ plc.project.LexerTests

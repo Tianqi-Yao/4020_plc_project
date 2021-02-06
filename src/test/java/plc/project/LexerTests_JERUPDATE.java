@@ -10,7 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class LexerTests {
+public class LexerTests_JERUPDATE {
 
     @ParameterizedTest
     @MethodSource
@@ -23,7 +23,8 @@ public class LexerTests {
                 Arguments.of("Alphabetic", "getName", true),
                 Arguments.of("Alphanumeric", "thelegend27", true),
                 Arguments.of("Leading Hyphen", "-five", false),
-                Arguments.of("Leading Digit", "1fish2fish3fishbluefish", false)
+                Arguments.of("Leading Digit", "1fish2fish3fishbluefish", false),
+                Arguments.of("Symbol in Middle", "getN$$ame", false)
         );
     }
 
@@ -70,7 +71,10 @@ public class LexerTests {
                 Arguments.of("Alphabetic", "\'c\'", true),
                 Arguments.of("Newline Escape", "\'\\n\'", true),
                 Arguments.of("Empty", "\'\'", false),
-                Arguments.of("Multiple", "\'abc\'", false)
+                Arguments.of("Multiple", "\'abc\'", false),
+                Arguments.of("No close", "\'a", false),
+                Arguments.of("Cannot escape single quote", "\'\\\'\'", false),
+                Arguments.of("No ''' allowed", "\'\'\'", false)
         );
     }
 
@@ -86,7 +90,9 @@ public class LexerTests {
                 Arguments.of("Alphabetic", "\"abc\"", true),
                 Arguments.of("Newline Escape", "\"Hello,\\nWorld\"", true),
                 Arguments.of("Unterminated", "\"unterminated", false),
-                Arguments.of("Invalid Escape", "\"invalid\\escape\"", false)
+                Arguments.of("Invalid Escape", "\"invalid\\escape\"", false),
+                Arguments.of("Start without Quote", "notGood\"", false),
+                Arguments.of("Cannot escape \" double Quote", "\" This is not \" allowed!\"", false)
         );
     }
 
@@ -102,7 +108,8 @@ public class LexerTests {
                 Arguments.of("Character", "(", true),
                 Arguments.of("Comparison", "<=", true),
                 Arguments.of("Space", " ", false),
-                Arguments.of("Tab", "\t", false)
+                Arguments.of("Tab", "\t", false),
+                Arguments.of("Dollar Sign", "$", true)
         );
     }
 
@@ -127,6 +134,19 @@ public class LexerTests {
                         new Token(Token.Type.STRING, "\"Hello, World!\"", 6),
                         new Token(Token.Type.OPERATOR, ")", 21),
                         new Token(Token.Type.OPERATOR, ";", 22)
+                )),
+                Arguments.of("Example 3", "let x <= (5 * x + 14.753);", Arrays.asList(
+                        new Token(Token.Type.IDENTIFIER, "let", 0),
+                        new Token(Token.Type.IDENTIFIER, "x", 4),
+                        new Token(Token.Type.OPERATOR, "<=", 6),
+                        new Token(Token.Type.OPERATOR, "(", 9),
+                        new Token(Token.Type.INTEGER, "5", 10),
+                        new Token(Token.Type.OPERATOR, "*", 12),
+                        new Token(Token.Type.IDENTIFIER, "x", 14),
+                        new Token(Token.Type.OPERATOR, "+", 16),
+                        new Token(Token.Type.DECIMAL, "14.753", 18),
+                        new Token(Token.Type.OPERATOR, ")", 24),
+                        new Token(Token.Type.OPERATOR, ";", 25)
                 ))
         );
     }

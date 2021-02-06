@@ -1,3 +1,7 @@
+// Jeremy DePoyster
+// University of Florida
+// COP4020 Spring 2021 Online
+
 package plc.project;
 
 import java.util.ArrayList;
@@ -33,11 +37,11 @@ public final class Lexer {
         // Create empty List
         List<Token> tokens = new ArrayList<Token>();
 
-        // FIGURE OUT HOW TO LOOP THIS  ///////////////////////// TODO
+        // LOOP START //////////////////////////////////////////////////
         while (peek(".")) {
             // Detect Whitespace
             if (peek("[ \\\b\\\n\\\r\\\t]")) {
-                // CHANGE THE BELOW TO, SKIP!        --------------  TODO
+                // CHANGE THE BELOW TO, SKIP!
                 chars.advance();
                 chars.skip();
 
@@ -47,7 +51,7 @@ public final class Lexer {
             }
         }
 
-        // END LOOP //////////////////////////////////////////////TODO
+        // END LOOP ////////////////////////////////////////////////////
 
         return tokens;
     }
@@ -66,7 +70,7 @@ public final class Lexer {
             return lexIdentifier();
 
         // Number
-        else if (peek("[+\\-0-9]"))
+        else if (peek("[+\\-]", "[0-9]") || peek("[0-9]"))
             return lexNumber();
 
         // Character
@@ -108,7 +112,7 @@ public final class Lexer {
         // Catch escape
         if (peek("\\\\") && !peek("\\\\", "'"))
             lexEscape();
-        else if (peek("[^'\\n\\r\\\\]"))                     ////// CHECK THIS TO SEE IF /n ALLOWED TODO
+        else if (peek("[^'\\n\\r\\\\]"))   ////// CHECK THIS TO SEE IF /n ALLOWED
             match("[^'\\n\\r\\\\]");
         else
             throw new ParseException("Illegal Character", chars.index);
@@ -120,33 +124,28 @@ public final class Lexer {
     }
 
     public Token lexString() {
+        // Match starting "
         if (peek("\""))
             match("\"");
-        System.out.println("prewhile");
         // String contents loop
         while (peek("[^\"]")) {
-            System.out.println("while");
-            // match legal escape
-            if (peek("\\\\")) {
-                System.out.println("slash");
-                if (peek("\\\\", "[bt'\\\\]"))                    //////// CHECK TO SEE IF \n ALLOWED
-                    match("\\\\", "[bt'\\\\]");
-                else
-                    throw new ParseException("Illegal Escape", chars.index);
-            }
+            // Match legal escape
+            if (peek("\\\\") && !peek("\\\\", "\""))
+                lexEscape();
+            // Match any other Char
             else
-                match(".");
+                match("[^\"\\n\\r\\\\]");
         }
-        System.out.println("postwhile");
+        // Math final "
         if (peek("\""))
             match("\"");
         else
             throw new ParseException("Unterminated String", chars.index);
-        System.out.println("bout_to_return");
         return chars.emit(Token.Type.STRING);
     }
 
     public void lexEscape() {
+        // Test escapes for legal, if not, throw exception
         if (peek("\\\\", "[bnrt'\"\\\\]"))
             match("\\\\", "[bnrt'\"\\\\]");
         else
