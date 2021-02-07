@@ -23,7 +23,8 @@ public class LexerTests {
                 Arguments.of("Alphabetic", "getName", true),
                 Arguments.of("Alphanumeric", "thelegend27", true),
                 Arguments.of("Leading Hyphen", "-five", false),
-                Arguments.of("Leading Digit", "1fish2fish3fishbluefish", false)
+                Arguments.of("Leading Digit", "1fish2fish3fishbluefish", false),
+                Arguments.of("Hypgehn in middle", "a-b-c", true)
         );
     }
 
@@ -86,7 +87,8 @@ public class LexerTests {
                 Arguments.of("Alphabetic", "\"abc\"", true),
                 Arguments.of("Newline Escape", "\"Hello,\\nWorld\"", true),
                 Arguments.of("Unterminated", "\"unterminated", false),
-                Arguments.of("Invalid Escape", "\"invalid\\escape\"", false)
+                Arguments.of("Invalid Escape", "\"invalid\\escape\"", false),
+                Arguments.of("Newline Unterminated", "\"unterminated␊\"", false)
         );
     }
 
@@ -136,6 +138,9 @@ public class LexerTests {
         ParseException exception = Assertions.assertThrows(ParseException.class,
                 () -> new Lexer("\"unterminated").lex());
         Assertions.assertEquals(13, exception.getIndex());
+        exception = Assertions.assertThrows(ParseException.class,
+                () -> new Lexer("\"invalid\\escape\"").lex());
+        Assertions.assertEquals(10, exception.getIndex());
     }
 
     /**

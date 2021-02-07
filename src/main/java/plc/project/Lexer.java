@@ -2,6 +2,8 @@
 // University of Florida
 // COP4020 Spring 2021 Online
 
+// UPDATED 2/7/21 - Amended Thrown Exception Index's
+
 package plc.project;
 
 import java.util.ArrayList;
@@ -87,8 +89,8 @@ public final class Lexer {
     }
 
     public Token lexIdentifier() {
-        while (peek("[A-Za-z_0-9]"))
-            match("[A-Za-z_0-9]");
+        while (peek("[A-Za-z_0-9-]"))
+            match("[A-Za-z_0-9-]");
         return chars.emit(Token.Type.IDENTIFIER);
     }
 
@@ -114,12 +116,15 @@ public final class Lexer {
             lexEscape();
         else if (peek("[^'\\n\\r\\\\]"))   ////// CHECK THIS TO SEE IF /n ALLOWED
             match("[^'\\n\\r\\\\]");
-        else
+        else {
+            System.out.println("BAD INDEX: " + chars.index + " - CHARACTER LOOP " + chars.input);
             throw new ParseException("Illegal Character", chars.index);
+        }
         if (peek("'")) {
             match("'");
             return chars.emit(Token.Type.CHARACTER);
         }
+        System.out.println("BAD INDEX: " + chars.index + " - CHARACTER " + chars.input);
         throw new ParseException("Illegal Character", chars.index);
     }
 
@@ -128,19 +133,22 @@ public final class Lexer {
         if (peek("\""))
             match("\"");
         // String contents loop
-        while (peek("[^\"]")) {
+        while (peek("[^\"\\n\\r␊]")) {
             // Match legal escape
             if (peek("\\\\") && !peek("\\\\", "\""))
                 lexEscape();
             // Match any other Char
             else
-                match("[^\"\\n\\r\\\\]");
+                match(".");
         }
         // Math final "
         if (peek("\""))
             match("\"");
-        else
+        else {
+            match(".");
+            System.out.println("BAD INDEX: " + chars.index + " - STRING " + chars.input);
             throw new ParseException("Unterminated String", chars.index);
+        }
         return chars.emit(Token.Type.STRING);
     }
 
@@ -148,8 +156,11 @@ public final class Lexer {
         // Test escapes for legal, if not, throw exception
         if (peek("\\\\", "[bnrt'\"\\\\]"))
             match("\\\\", "[bnrt'\"\\\\]");
-        else
+        else {
+            match(".", ".");
+            System.out.println("BAD INDEX: " + chars.index + " - ESCAPE " + chars.input);
             throw new ParseException("Illegal Escape", chars.index);
+        }
     }
 
     public Token lexOperator() {
