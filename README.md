@@ -3,7 +3,7 @@ This is the term project for COP4020 Programming Language Concepts at the Univer
 
 The project consists of creating various components used to build a language on top of Java.
 
-## Current Progress:
+### Current Progress:
 Completed:
 - Lexer
 WIP:
