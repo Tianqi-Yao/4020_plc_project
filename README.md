@@ -6,6 +6,7 @@ The project consists of creating various components used to build a language on 
 ### Current Progress:
 Completed:
 - Lexer
+
 WIP:
 - Parser
 - Interpreter
