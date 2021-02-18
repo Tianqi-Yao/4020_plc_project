@@ -73,7 +73,7 @@ public class LexerTests_JERUPDATE {
                 Arguments.of("Empty", "\'\'", false),
                 Arguments.of("Multiple", "\'abc\'", false),
                 Arguments.of("No close", "\'a", false),
-                Arguments.of("Cannot escape single quote", "\'\\\'\'", false),
+                Arguments.of("Escape single quote", "\'\\\'\'", true),
                 Arguments.of("No ''' allowed", "\'\'\'", false)
         );
     }
@@ -92,7 +92,9 @@ public class LexerTests_JERUPDATE {
                 Arguments.of("Unterminated", "\"unterminated", false),
                 Arguments.of("Invalid Escape", "\"invalid\\escape\"", false),
                 Arguments.of("Start without Quote", "notGood\"", false),
-                Arguments.of("Cannot escape \" double Quote", "\" This is not \" allowed!\"", false)
+                Arguments.of("Cannot escape \" double Quote", "\" This is not \" allowed!\"", false),
+                Arguments.of("Special escapes", "\"sq\\\'dq\\\"bs\\\\\"", true),
+                Arguments.of("NEWLINE", "\"This is a \\n test\"", true)
         );
     }
 
@@ -121,33 +123,56 @@ public class LexerTests_JERUPDATE {
 
     private static Stream<Arguments> testExamples() {
         return Stream.of(
-                Arguments.of("Example 1", "LET x = 5;", Arrays.asList(
+                // Arguments.of("Example 1", "LET x = 5;", Arrays.asList(
+                //         new Token(Token.Type.IDENTIFIER, "LET", 0),
+                //         new Token(Token.Type.IDENTIFIER, "x", 4),
+                //         new Token(Token.Type.OPERATOR, "=", 6),
+                //         new Token(Token.Type.INTEGER, "5", 8),
+                //         new Token(Token.Type.OPERATOR, ";", 9)
+                // )),
+                // Arguments.of("Example 2", "print(\"Hello, World!\");", Arrays.asList(
+                //         new Token(Token.Type.IDENTIFIER, "print", 0),
+                //         new Token(Token.Type.OPERATOR, "(", 5),
+                //         new Token(Token.Type.STRING, "\"Hello, World!\"", 6),
+                //         new Token(Token.Type.OPERATOR, ")", 21),
+                //         new Token(Token.Type.OPERATOR, ";", 22)
+                // )),
+                // Arguments.of("Example 3", "let x <= (5 * x + 14.753);", Arrays.asList(
+                //         new Token(Token.Type.IDENTIFIER, "let", 0),
+                //         new Token(Token.Type.IDENTIFIER, "x", 4),
+                //         new Token(Token.Type.OPERATOR, "<=", 6),
+                //         new Token(Token.Type.OPERATOR, "(", 9),
+                //         new Token(Token.Type.INTEGER, "5", 10),
+                //         new Token(Token.Type.OPERATOR, "*", 12),
+                //         new Token(Token.Type.IDENTIFIER, "x", 14),
+                //         new Token(Token.Type.OPERATOR, "+", 16),
+                //         new Token(Token.Type.DECIMAL, "14.753", 18),
+                //         new Token(Token.Type.OPERATOR, ")", 24),
+                //         new Token(Token.Type.OPERATOR, ";", 25)
+                // )),
+                // Arguments.of("Windows EOL", "one␍␊two", Arrays.asList(
+                //         new Token(Token.Type.IDENTIFIER, "one", 0),
+                //         new Token(Token.Type.IDENTIFIER, "two", 5)
+                // )),
+                // Arguments.of("Mixed Whitespace", "one ␈␊␍␉two", Arrays.asList(
+                //         new Token(Token.Type.IDENTIFIER, "one", 0),
+                //         new Token(Token.Type.IDENTIFIER, "two", 8)
+                // )),
+                // Arguments.of("All types", "abc 123 456.789 \'c\' \"string\" %", Arrays.asList(
+                //         new Token(Token.Type.IDENTIFIER, "abc", 0),
+                //         new Token(Token.Type.INTEGER, "123", 4),
+                //         new Token(Token.Type.DECIMAL, "456.789", 8),
+                //         new Token(Token.Type.CHARACTER, "\'c\'", 16),
+                //         new Token(Token.Type.STRING, "\"string\"", 20),
+                //         new Token(Token.Type.OPERATOR, "%", 29)
+                // )),
+
+                // FIZZ BUZZ ////////////////////////////////////////////////////////////////////////////////////////////////////////
+                Arguments.of("Fizzbuzz", "LET i = 1;␍␊WHILE i <= 100 DO␍␊\tIF rem(i, 3) == 0 AND rem(i, 5) == 0 DO␍␊\t\tprint(\"FizzBuzz\");␍␊\tELSE IF rem(i, 3) == 0 DO␍␊\t\tprint(\"Fizz\");␍␊\tELSE IF rem(i, 5) == 0 DO␍␊\t\tprint(\"Buzz\");␍␊\tELSE␍␊\t\tprint(i);␍␊\tEND END END␍␊\ti = i + 1;␍␊END", Arrays.asList(
                         new Token(Token.Type.IDENTIFIER, "LET", 0),
-                        new Token(Token.Type.IDENTIFIER, "x", 4),
-                        new Token(Token.Type.OPERATOR, "=", 6),
-                        new Token(Token.Type.INTEGER, "5", 8),
-                        new Token(Token.Type.OPERATOR, ";", 9)
-                )),
-                Arguments.of("Example 2", "print(\"Hello, World!\");", Arrays.asList(
-                        new Token(Token.Type.IDENTIFIER, "print", 0),
-                        new Token(Token.Type.OPERATOR, "(", 5),
-                        new Token(Token.Type.STRING, "\"Hello, World!\"", 6),
-                        new Token(Token.Type.OPERATOR, ")", 21),
-                        new Token(Token.Type.OPERATOR, ";", 22)
-                )),
-                Arguments.of("Example 3", "let x <= (5 * x + 14.753);", Arrays.asList(
-                        new Token(Token.Type.IDENTIFIER, "let", 0),
-                        new Token(Token.Type.IDENTIFIER, "x", 4),
-                        new Token(Token.Type.OPERATOR, "<=", 6),
-                        new Token(Token.Type.OPERATOR, "(", 9),
-                        new Token(Token.Type.INTEGER, "5", 10),
-                        new Token(Token.Type.OPERATOR, "*", 12),
-                        new Token(Token.Type.IDENTIFIER, "x", 14),
-                        new Token(Token.Type.OPERATOR, "+", 16),
-                        new Token(Token.Type.DECIMAL, "14.753", 18),
-                        new Token(Token.Type.OPERATOR, ")", 24),
-                        new Token(Token.Type.OPERATOR, ";", 25)
+                        new Token(Token.Type.INTEGER, "123", 4)
                 ))
+                ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         );
     }
 

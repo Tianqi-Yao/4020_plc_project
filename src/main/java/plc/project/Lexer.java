@@ -42,7 +42,27 @@ public final class Lexer {
         // LOOP START //////////////////////////////////////////////////
         while (peek(".")) {
             // Detect Whitespace
-            if (peek("[ \\\b\\\n\\\r\\\t]")) {
+            
+            // PRINT DEBUG SPACES
+            // if (peek("[\b]"))
+            //     System.out.println("b");
+            // if (peek("[\n]"))
+            //     System.out.println("n");
+            // if (peek("[\r]"))
+            //     System.out.println("r");
+            // if (peek("[\t]"))
+            //     System.out.println("t");
+            // if (peek("[␊]"))
+            //     System.out.println("lf");
+            // if (peek("[␍]"))
+            //     System.out.println("cr");
+            // if (peek("[␉]"))
+            //     System.out.println("ht");
+            // if (peek("[␈]"))
+            //     System.out.println("bs");
+
+
+            if (peek("[ \b\n\r\t␊␍␉␈]")) {
                 // CHANGE THE BELOW TO, SKIP!
                 chars.advance();
                 chars.skip();
@@ -76,7 +96,7 @@ public final class Lexer {
             return lexNumber();
 
         // Character
-        else if (peek("'"))
+        else if (peek("\'"))
             return lexCharacter();
 
         // String
@@ -99,8 +119,8 @@ public final class Lexer {
             match("[+\\-]");
         while (peek("\\d"))
             match("\\d");
-        if (peek(".", "\\d")) {
-            match(".");
+        if (peek("[.]", "\\d")) {
+            match("[.]");
             while (peek("\\d"))
                 match("\\d");
             return chars.emit(Token.Type.DECIMAL);
@@ -109,22 +129,22 @@ public final class Lexer {
     }
 
     public Token lexCharacter() {
-        if (peek("'"))
-            match("'");
+        if (peek("\'"))
+            match("\'");
         // Catch escape
-        if (peek("\\\\") && !peek("\\\\", "'"))
+        if (peek("\\\\"))
             lexEscape();
-        else if (peek("[^'\\n\\r\\\\]"))   ////// CHECK THIS TO SEE IF /n ALLOWED
-            match("[^'\\n\\r\\\\]");
+        else if (peek("[^\'\\n\\r\\\\]"))   ////// CHECK THIS TO SEE IF /n ALLOWED
+            match("[^\'\\n\\r\\\\]");
         else {
-            System.out.println("BAD INDEX: " + chars.index + " - CHARACTER LOOP " + chars.input);
+            // System.out.println("BAD INDEX: " + chars.index + " - CHARACTER LOOP " + chars.input);
             throw new ParseException("Illegal Character", chars.index);
         }
-        if (peek("'")) {
-            match("'");
+        if (peek("\'")) {
+            match("\'");
             return chars.emit(Token.Type.CHARACTER);
         }
-        System.out.println("BAD INDEX: " + chars.index + " - CHARACTER " + chars.input);
+        // System.out.println("BAD INDEX: " + chars.index + " - CHARACTER " + chars.input);
         throw new ParseException("Illegal Character", chars.index);
     }
 
@@ -135,7 +155,7 @@ public final class Lexer {
         // String contents loop
         while (peek("[^\"\\n\\r␊]")) {
             // Match legal escape
-            if (peek("\\\\") && !peek("\\\\", "\""))
+            if (peek("\\\\"))
                 lexEscape();
             // Match any other Char
             else
@@ -146,7 +166,7 @@ public final class Lexer {
             match("\"");
         else {
             match(".");
-            System.out.println("BAD INDEX: " + chars.index + " - STRING " + chars.input);
+            // System.out.println("BAD INDEX: " + chars.index + " - STRING " + chars.input);
             throw new ParseException("Unterminated String", chars.index);
         }
         return chars.emit(Token.Type.STRING);
@@ -154,11 +174,11 @@ public final class Lexer {
 
     public void lexEscape() {
         // Test escapes for legal, if not, throw exception
-        if (peek("\\\\", "[bnrt'\"\\\\]"))
-            match("\\\\", "[bnrt'\"\\\\]");
+        if (peek("\\\\", "[bnrt\'\"\\\\]"))
+            match("\\\\", "[bnrt\'\"\\\\]");
         else {
             match(".", ".");
-            System.out.println("BAD INDEX: " + chars.index + " - ESCAPE " + chars.input);
+            // System.out.println("BAD INDEX: " + chars.index + " - ESCAPE " + chars.input);
             throw new ParseException("Illegal Escape", chars.index);
         }
     }
