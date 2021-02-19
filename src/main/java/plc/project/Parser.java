@@ -394,14 +394,40 @@ public final class Parser {
      * Parses the {@code additive-expression} rule.
      */
     public Ast.Expr parseAdditiveExpression() throws ParseException {
-        return parseMultiplicativeExpression();
+        Ast.Expr left = parseMultiplicativeExpression();
+
+        while (peek("+") || peek("-")) {
+            String operator = tokens.get(0).getLiteral();
+            
+            match(Token.Type.OPERATOR);
+            
+            Ast.Expr right = parseAdditiveExpression();
+
+            if (!peek("+") || !peek("-"))
+                return new Ast.Expr.Binary(operator, left, right);
+        }
+        
+        return left;
     }
 
     /**
      * Parses the {@code multiplicative-expression} rule.
      */
     public Ast.Expr parseMultiplicativeExpression() throws ParseException {
-        return parseSecondaryExpression();
+        Ast.Expr left = parseSecondaryExpression();
+
+        while (peek("*") || peek("/")) {
+            String operator = tokens.get(0).getLiteral();
+            
+            match(Token.Type.OPERATOR);
+            
+            Ast.Expr right = parseAdditiveExpression();
+
+            if (!peek("*") || !peek("/"))
+                return new Ast.Expr.Binary(operator, left, right);
+        }
+        
+        return left;
     }
 
     /**

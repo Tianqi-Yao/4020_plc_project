@@ -79,7 +79,7 @@ final class ParserTests_JERUPDATE {
                 Arguments.of("Function Expression",
                         Arrays.asList(
                                 //name();
-                                new Token(Token.Type.IDENTIFIER, "nameFuny", 0),
+                                new Token(Token.Type.IDENTIFIER, "name", 0),
                                 new Token(Token.Type.OPERATOR, "(", 4),
                                 new Token(Token.Type.OPERATOR, ")", 5),
                                 new Token(Token.Type.OPERATOR, ";", 6)

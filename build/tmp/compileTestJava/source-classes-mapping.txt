@@ -2,11 +2,11 @@ plc/homework/RegexTests.java
  plc.homework.RegexTests
 plc/project/LexerTests.java
  plc.project.LexerTests
-plc/project/ParserTests.java
- plc.project.ParserTests
-plc/project/CharStreamTest.java
- plc.project.CharStreamTest
 plc/project/LexerTests_JERUPDATE.java
  plc.project.LexerTests_JERUPDATE
+plc/project/CharStreamTest.java
+ plc.project.CharStreamTest
+plc/project/ParserTests.java
+ plc.project.ParserTests
 plc/project/ParserTests_JERUPDATE.java
  plc.project.ParserTests_JERUPDATE
