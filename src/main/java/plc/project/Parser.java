@@ -354,14 +354,40 @@ public final class Parser {
      * Parses the {@code logical-expression} rule.
      */
     public Ast.Expr parseLogicalExpression() throws ParseException {
-        return parseEqualityExpression();
+        Ast.Expr left = parseEqualityExpression();
+
+        while (peek("AND") || peek("OR")) {
+            String operator = tokens.get(0).getLiteral();
+            
+            match(Token.Type.IDENTIFIER); // equiv of match("AND") || match("OR")
+            
+            Ast.Expr right = parseEqualityExpression();
+
+            if (!peek("AND") && !peek("OR"))
+                return new Ast.Expr.Binary(operator, left, right);
+        }
+
+        return left;
     }
 
     /**
      * Parses the {@code equality-expression} rule.
      */
     public Ast.Expr parseEqualityExpression() throws ParseException {
-        return parseAdditiveExpression();
+        Ast.Expr left = parseAdditiveExpression();
+        // Break these peeks into a modular format later
+        while (peek("<") || peek("<=") || peek(">") || peek(">=") || peek("==") || peek("!=")) {
+            String operator = tokens.get(0).getLiteral();
+            
+            match(Token.Type.OPERATOR);
+            
+            Ast.Expr right = parseAdditiveExpression();
+
+            if (!peek("<") || !peek("<=") || !peek(">") || !peek(">=") || !peek("==") || !peek("!="))
+                return new Ast.Expr.Binary(operator, left, right);
+        }
+        
+        return left;
     }
 
     /**
