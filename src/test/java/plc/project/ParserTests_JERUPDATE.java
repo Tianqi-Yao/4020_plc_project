@@ -18,7 +18,7 @@ import java.util.stream.Stream;
  * Standard JUnit5 parameterized tests. See the RegexTests file from Homework 1
  * or the LexerTests file from the last project part for more information.
  */
-final class ParserTests {
+final class ParserTests_JERUPDATE {
 
     @ParameterizedTest
     @MethodSource
@@ -31,40 +31,40 @@ final class ParserTests {
                 Arguments.of("Zero Statements",
                         Arrays.asList(),
                         new Ast.Source(Arrays.asList(), Arrays.asList())
-                )//,
-                // Arguments.of("Field",
-                //         Arrays.asList(
-                //                 //LET name = expr;
-                //                 new Token(Token.Type.IDENTIFIER, "LET", 0),
-                //                 new Token(Token.Type.IDENTIFIER, "name", 4),
-                //                 new Token(Token.Type.OPERATOR, "=", 9),
-                //                 new Token(Token.Type.IDENTIFIER, "expr", 11),
-                //                 new Token(Token.Type.OPERATOR, ";", 15)
-                //         ),
-                //         new Ast.Source(
-                //                 Arrays.asList(new Ast.Field("name", Optional.of(new Ast.Expr.Access(Optional.empty(), "expr")))),
-                //                 Arrays.asList()
-                //         )
-                // ),
-                // Arguments.of("Method",
-                //         Arrays.asList(
-                //                 //DEF name() DO stmt; END
-                //                 new Token(Token.Type.IDENTIFIER, "DEF", 0),
-                //                 new Token(Token.Type.IDENTIFIER, "name", 4),
-                //                 new Token(Token.Type.OPERATOR, "(", 8),
-                //                 new Token(Token.Type.OPERATOR, ")", 9),
-                //                 new Token(Token.Type.IDENTIFIER, "DO", 11),
-                //                 new Token(Token.Type.IDENTIFIER, "stmt", 14),
-                //                 new Token(Token.Type.OPERATOR, ";", 18),
-                //                 new Token(Token.Type.IDENTIFIER, "END", 20)
-                //         ),
-                //         new Ast.Source(
-                //                 Arrays.asList(),
-                //                 Arrays.asList(new Ast.Method("name", Arrays.asList(), Arrays.asList(
-                //                         new Ast.Stmt.Expression(new Ast.Expr.Access(Optional.empty(), "stmt"))
-                //                 )))
-                //         )
-                // )
+                ),
+                Arguments.of("Field",
+                        Arrays.asList(
+                                //LET name = expr;
+                                new Token(Token.Type.IDENTIFIER, "LET", 0),
+                                new Token(Token.Type.IDENTIFIER, "name", 4),
+                                new Token(Token.Type.OPERATOR, "=", 9),
+                                new Token(Token.Type.IDENTIFIER, "expr", 11),
+                                new Token(Token.Type.OPERATOR, ";", 15)
+                        ),
+                        new Ast.Source(
+                                Arrays.asList(new Ast.Field("name", Optional.of(new Ast.Expr.Access(Optional.empty(), "expr")))),
+                                Arrays.asList()
+                        )
+                ),
+                Arguments.of("Method",
+                        Arrays.asList(
+                                //DEF name() DO stmt; END
+                                new Token(Token.Type.IDENTIFIER, "DEF", 0),
+                                new Token(Token.Type.IDENTIFIER, "name", 4),
+                                new Token(Token.Type.OPERATOR, "(", 8),
+                                new Token(Token.Type.OPERATOR, ")", 9),
+                                new Token(Token.Type.IDENTIFIER, "DO", 11),
+                                new Token(Token.Type.IDENTIFIER, "stmt", 14),
+                                new Token(Token.Type.OPERATOR, ";", 18),
+                                new Token(Token.Type.IDENTIFIER, "END", 20)
+                        ),
+                        new Ast.Source(
+                                Arrays.asList(),
+                                Arrays.asList(new Ast.Method("name", Arrays.asList(), Arrays.asList(
+                                        new Ast.Stmt.Expression(new Ast.Expr.Access(Optional.empty(), "stmt"))
+                                )))
+                        )
+                )
         );
     }
 
@@ -79,7 +79,7 @@ final class ParserTests {
                 Arguments.of("Function Expression",
                         Arrays.asList(
                                 //name();
-                                new Token(Token.Type.IDENTIFIER, "name", 0),
+                                new Token(Token.Type.IDENTIFIER, "nameFuny", 0),
                                 new Token(Token.Type.OPERATOR, "(", 4),
                                 new Token(Token.Type.OPERATOR, ")", 5),
                                 new Token(Token.Type.OPERATOR, ";", 6)
@@ -258,7 +258,8 @@ final class ParserTests {
                         Arrays.asList(
                                 //RETURN expr;
                                 new Token(Token.Type.IDENTIFIER, "RETURN", 0),
-                                new Token(Token.Type.IDENTIFIER, "expr", 7)
+                                new Token(Token.Type.IDENTIFIER, "expr", 7),
+                                new Token(Token.Type.OPERATOR, ";", 8)
                         ),
                         new Ast.Stmt.Return(new Ast.Expr.Access(Optional.empty(), "expr"))
                 )
@@ -277,6 +278,14 @@ final class ParserTests {
                         Arrays.asList(new Token(Token.Type.IDENTIFIER, "TRUE", 0)),
                         new Ast.Expr.Literal(Boolean.TRUE)
                 ),
+                Arguments.of("Boolean Literal",
+                        Arrays.asList(new Token(Token.Type.IDENTIFIER, "FALSE", 0)),
+                        new Ast.Expr.Literal(Boolean.FALSE)
+                ),
+                Arguments.of("Nil",
+                        Arrays.asList(new Token(Token.Type.IDENTIFIER, "NIL", 0)),
+                        new Ast.Expr.Literal(null)
+                ),
                 Arguments.of("Integer Literal",
                         Arrays.asList(new Token(Token.Type.INTEGER, "1", 0)),
                         new Ast.Expr.Literal(new BigInteger("1"))
@@ -288,6 +297,34 @@ final class ParserTests {
                 Arguments.of("Character Literal",
                         Arrays.asList(new Token(Token.Type.CHARACTER, "'c'", 0)),
                         new Ast.Expr.Literal('c')
+                ),
+                Arguments.of("Character Escape",
+                        Arrays.asList(new Token(Token.Type.CHARACTER, "'\\n'", 0)),
+                        new Ast.Expr.Literal('\n')
+                ),
+                Arguments.of("Character Escape",
+                        Arrays.asList(new Token(Token.Type.CHARACTER, "'\\b'", 0)),
+                        new Ast.Expr.Literal('\b')
+                ),
+                Arguments.of("Character Escape",
+                        Arrays.asList(new Token(Token.Type.CHARACTER, "'\\r'", 0)),
+                        new Ast.Expr.Literal('\r')
+                ),
+                Arguments.of("Character Escape",
+                        Arrays.asList(new Token(Token.Type.CHARACTER, "'\\t'", 0)),
+                        new Ast.Expr.Literal('\t')
+                ),
+                Arguments.of("Character Escape",
+                        Arrays.asList(new Token(Token.Type.CHARACTER, "'\\\"'", 0)),
+                        new Ast.Expr.Literal('\"')
+                ),
+                Arguments.of("Character Escape",
+                        Arrays.asList(new Token(Token.Type.CHARACTER, "'\\\\'", 0)),
+                        new Ast.Expr.Literal('\\')
+                ),
+                Arguments.of("Character Escape",
+                        Arrays.asList(new Token(Token.Type.CHARACTER, "'\\\''", 0)),
+                        new Ast.Expr.Literal('\'')
                 ),
                 Arguments.of("String Literal",
                         Arrays.asList(new Token(Token.Type.STRING, "\"string\"", 0)),
@@ -409,7 +446,7 @@ final class ParserTests {
                         Arrays.asList(
                                 //obj.field
                                 new Token(Token.Type.IDENTIFIER, "obj", 0),
-                                new Token(Token.Type.IDENTIFIER, ".", 3),
+                                new Token(Token.Type.OPERATOR, ".", 3),
                                 new Token(Token.Type.IDENTIFIER, "field", 4)
                         ),
                         new Ast.Expr.Access(Optional.of(new Ast.Expr.Access(Optional.empty(), "obj")), "field")
@@ -468,6 +505,7 @@ final class ParserTests {
 
     @Test
     void testExample1() {
+            System.out.println("EX1");
         List<Token> input = Arrays.asList(
                 /* LET first = 1;
                  * DEF main() DO

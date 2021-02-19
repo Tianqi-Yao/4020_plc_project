@@ -43,26 +43,7 @@ public final class Lexer {
         while (peek(".")) {
             // Detect Whitespace
             
-            // PRINT DEBUG SPACES
-            // if (peek("[\b]"))
-            //     System.out.println("b");
-            // if (peek("[\n]"))
-            //     System.out.println("n");
-            // if (peek("[\r]"))
-            //     System.out.println("r");
-            // if (peek("[\t]"))
-            //     System.out.println("t");
-            // if (peek("[␊]"))
-            //     System.out.println("lf");
-            // if (peek("[␍]"))
-            //     System.out.println("cr");
-            // if (peek("[␉]"))
-            //     System.out.println("ht");
-            // if (peek("[␈]"))
-            //     System.out.println("bs");
-
-
-            if (peek("[ \b\n\r\t␊␍␉␈]")) {
+            if (peek("[ \b\n\r\t]")) {
                 // CHANGE THE BELOW TO, SKIP!
                 chars.advance();
                 chars.skip();
@@ -153,7 +134,7 @@ public final class Lexer {
         if (peek("\""))
             match("\"");
         // String contents loop
-        while (peek("[^\"\\n\\r␊]")) {
+        while (peek("[^\"\\n\\r]")) {
             // Match legal escape
             if (peek("\\\\"))
                 lexEscape();
