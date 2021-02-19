@@ -168,7 +168,7 @@ public final class Parser {
         else if (peek("RETURN"))
             return parseReturnStatement();
 
-        // EXPRESSION
+        // EXPRESSION ('=' expression)?
         else {
             Ast.Expr current = parseExpression();
             if (peek("=")) {
@@ -187,9 +187,7 @@ public final class Parser {
                     throw new UnsupportedOperationException();
             }
             throw new UnsupportedOperationException();
-
         }
-
     }
 
     /**
@@ -242,7 +240,7 @@ public final class Parser {
             List<Ast.Stmt> thenStatements = new ArrayList<Ast.Stmt>();
             List<Ast.Stmt> elseStatements = new ArrayList<Ast.Stmt>();
 
-            while (!peek("ELSE") || !peek("END"))
+            while (!peek("ELSE") && !peek("END"))
                 thenStatements.add(parseStatement());
 
             if (peek("ELSE")) {
