@@ -1,3 +1,8 @@
+// Jeremy DePoyster
+// University of Florida
+// COP4020 Spring 2021 Online
+// Current as of 2/19/21
+
 package plc.project;
 
 import java.util.List;
@@ -676,7 +681,5 @@ public final class Parser {
         public void advance() {
             index++;
         }
-
     }
-
 }

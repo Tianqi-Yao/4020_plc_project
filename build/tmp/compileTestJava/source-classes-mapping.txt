@@ -6,7 +6,7 @@ plc/project/LexerTests_JERUPDATE.java
  plc.project.LexerTests_JERUPDATE
 plc/project/CharStreamTest.java
  plc.project.CharStreamTest
-plc/project/ParserTests.java
- plc.project.ParserTests
 plc/project/ParserTests_JERUPDATE.java
  plc.project.ParserTests_JERUPDATE
+plc/project/ParserTests.java
+ plc.project.ParserTests

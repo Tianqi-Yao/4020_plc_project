@@ -31,40 +31,40 @@ final class ParserTests {
                 Arguments.of("Zero Statements",
                         Arrays.asList(),
                         new Ast.Source(Arrays.asList(), Arrays.asList())
-                )//,
-                // Arguments.of("Field",
-                //         Arrays.asList(
-                //                 //LET name = expr;
-                //                 new Token(Token.Type.IDENTIFIER, "LET", 0),
-                //                 new Token(Token.Type.IDENTIFIER, "name", 4),
-                //                 new Token(Token.Type.OPERATOR, "=", 9),
-                //                 new Token(Token.Type.IDENTIFIER, "expr", 11),
-                //                 new Token(Token.Type.OPERATOR, ";", 15)
-                //         ),
-                //         new Ast.Source(
-                //                 Arrays.asList(new Ast.Field("name", Optional.of(new Ast.Expr.Access(Optional.empty(), "expr")))),
-                //                 Arrays.asList()
-                //         )
-                // ),
-                // Arguments.of("Method",
-                //         Arrays.asList(
-                //                 //DEF name() DO stmt; END
-                //                 new Token(Token.Type.IDENTIFIER, "DEF", 0),
-                //                 new Token(Token.Type.IDENTIFIER, "name", 4),
-                //                 new Token(Token.Type.OPERATOR, "(", 8),
-                //                 new Token(Token.Type.OPERATOR, ")", 9),
-                //                 new Token(Token.Type.IDENTIFIER, "DO", 11),
-                //                 new Token(Token.Type.IDENTIFIER, "stmt", 14),
-                //                 new Token(Token.Type.OPERATOR, ";", 18),
-                //                 new Token(Token.Type.IDENTIFIER, "END", 20)
-                //         ),
-                //         new Ast.Source(
-                //                 Arrays.asList(),
-                //                 Arrays.asList(new Ast.Method("name", Arrays.asList(), Arrays.asList(
-                //                         new Ast.Stmt.Expression(new Ast.Expr.Access(Optional.empty(), "stmt"))
-                //                 )))
-                //         )
-                // )
+                ),
+                Arguments.of("Field",
+                        Arrays.asList(
+                                //LET name = expr;
+                                new Token(Token.Type.IDENTIFIER, "LET", 0),
+                                new Token(Token.Type.IDENTIFIER, "name", 4),
+                                new Token(Token.Type.OPERATOR, "=", 9),
+                                new Token(Token.Type.IDENTIFIER, "expr", 11),
+                                new Token(Token.Type.OPERATOR, ";", 15)
+                        ),
+                        new Ast.Source(
+                                Arrays.asList(new Ast.Field("name", Optional.of(new Ast.Expr.Access(Optional.empty(), "expr")))),
+                                Arrays.asList()
+                        )
+                ),
+                Arguments.of("Method",
+                        Arrays.asList(
+                                //DEF name() DO stmt; END
+                                new Token(Token.Type.IDENTIFIER, "DEF", 0),
+                                new Token(Token.Type.IDENTIFIER, "name", 4),
+                                new Token(Token.Type.OPERATOR, "(", 8),
+                                new Token(Token.Type.OPERATOR, ")", 9),
+                                new Token(Token.Type.IDENTIFIER, "DO", 11),
+                                new Token(Token.Type.IDENTIFIER, "stmt", 14),
+                                new Token(Token.Type.OPERATOR, ";", 18),
+                                new Token(Token.Type.IDENTIFIER, "END", 20)
+                        ),
+                        new Ast.Source(
+                                Arrays.asList(),
+                                Arrays.asList(new Ast.Method("name", Arrays.asList(), Arrays.asList(
+                                        new Ast.Stmt.Expression(new Ast.Expr.Access(Optional.empty(), "stmt"))
+                                )))
+                        )
+                )
         );
     }
 
@@ -258,7 +258,8 @@ final class ParserTests {
                         Arrays.asList(
                                 //RETURN expr;
                                 new Token(Token.Type.IDENTIFIER, "RETURN", 0),
-                                new Token(Token.Type.IDENTIFIER, "expr", 7)
+                                new Token(Token.Type.IDENTIFIER, "expr", 7),
+                                new Token(Token.Type.OPERATOR, ";", 11)
                         ),
                         new Ast.Stmt.Return(new Ast.Expr.Access(Optional.empty(), "expr"))
                 )
@@ -409,7 +410,7 @@ final class ParserTests {
                         Arrays.asList(
                                 //obj.field
                                 new Token(Token.Type.IDENTIFIER, "obj", 0),
-                                new Token(Token.Type.IDENTIFIER, ".", 3),
+                                new Token(Token.Type.OPERATOR, ".", 3),
                                 new Token(Token.Type.IDENTIFIER, "field", 4)
                         ),
                         new Ast.Expr.Access(Optional.of(new Ast.Expr.Access(Optional.empty(), "obj")), "field")
