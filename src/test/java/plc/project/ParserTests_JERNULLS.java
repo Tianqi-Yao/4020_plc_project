@@ -18,12 +18,13 @@ import java.util.stream.Stream;
  * Standard JUnit5 parameterized tests. See the RegexTests file from Homework 1
  * or the LexerTests file from the last project part for more information.
  */
-final class ParserTests_JERUPDATE {
+final class ParserTests_JERNULLS {
 
     @ParameterizedTest
     @MethodSource
     void testSource(String test, List<Token> tokens, Ast.Source expected) {
-        test(tokens, expected, Parser::parseSource);
+//        test(tokens, expected, Parser::parseSource);
+        test(tokens, null, Parser::parseSource);
     }
 
     private static Stream<Arguments> testSource() {
@@ -65,6 +66,8 @@ final class ParserTests_JERUPDATE {
                                 )))
                         )
                 ),
+
+                // NULL: /////////////////////////////////////////////////////////////////////////////////////////////////////
                 Arguments.of("Method Field",
                         Arrays.asList(
                                 //DEF name() DO stmt; END
@@ -95,7 +98,8 @@ final class ParserTests_JERUPDATE {
     @ParameterizedTest
     @MethodSource
     void testExpressionStatement(String test, List<Token> tokens, Ast.Stmt.Expression expected) {
-        test(tokens, expected, Parser::parseStatement);
+        // test(tokens, expected, Parser::parseStatement);
+        test(tokens, null, Parser::parseStatement);
     }
 
     private static Stream<Arguments> testExpressionStatement() {
@@ -109,6 +113,23 @@ final class ParserTests_JERUPDATE {
                                 new Token(Token.Type.OPERATOR, ";", 6)
                         ),
                         new Ast.Stmt.Expression(new Ast.Expr.Function(Optional.empty(), "name", Arrays.asList()))
+                ),
+                Arguments.of("Function",
+                        Arrays.asList(
+                                //name();
+                                new Token(Token.Type.IDENTIFIER, "f", 0)
+                        ),
+                        new Ast.Stmt.Expression(new Ast.Expr.Function(Optional.empty(), "f", Arrays.asList()))
+                ),
+
+                // NULL: /////////////////////////////////////////////////////////////////////////////////////////////////////
+                Arguments.of("Variable",
+                        Arrays.asList(
+                                //name();
+                                new Token(Token.Type.IDENTIFIER, "expr", 0),
+                                new Token(Token.Type.OPERATOR, ";", 4)
+                        ),
+                        new Ast.Stmt.Expression(new Ast.Expr.Access(Optional.empty(), "expr"))
                 )
         );
     }
@@ -427,6 +448,22 @@ final class ParserTests_JERUPDATE {
                                 new Ast.Expr.Access(Optional.empty(), "expr2")
                         )
                 ),
+                Arguments.of("Binary Equals Not Equals",
+                        Arrays.asList(
+                                //expr1 == expr2 != expr3
+                                new Token(Token.Type.IDENTIFIER, "expr1", 0),
+                                new Token(Token.Type.OPERATOR, "==", 6),
+                                new Token(Token.Type.IDENTIFIER, "expr2", 9),
+                                new Token(Token.Type.OPERATOR, "!=", 15),
+                                new Token(Token.Type.IDENTIFIER, "expr3", 18)
+
+                        ),
+                        new Ast.Expr.Binary("!=",
+                                new Ast.Expr.Binary("==", new Ast.Expr.Access(Optional.empty(), "expr1"),
+                                new Ast.Expr.Access(Optional.empty(), "expr2")),
+                                new Ast.Expr.Access(Optional.empty(), "expr3")
+                        )
+                ),
                 Arguments.of("Binary Addition",
                         Arrays.asList(
                                 //expr1 + expr2
@@ -449,6 +486,21 @@ final class ParserTests_JERUPDATE {
                         new Ast.Expr.Binary("*",
                                 new Ast.Expr.Access(Optional.empty(), "expr1"),
                                 new Ast.Expr.Access(Optional.empty(), "expr2")
+                        )
+                ),
+                Arguments.of("Binary And Or",
+                        Arrays.asList(
+                                //expr1 AND expr2
+                                new Token(Token.Type.IDENTIFIER, "expr1", 0),
+                                new Token(Token.Type.IDENTIFIER, "AND", 6),
+                                new Token(Token.Type.IDENTIFIER, "expr2", 10),
+                                new Token(Token.Type.IDENTIFIER, "OR", 16),
+                                new Token(Token.Type.IDENTIFIER, "expr3", 19)
+                        ),
+                        new Ast.Expr.Binary("OR",
+                                new Ast.Expr.Binary("AND", new Ast.Expr.Access(Optional.empty(), "expr1"),
+                                new Ast.Expr.Access(Optional.empty(), "expr2")),
+                                new Ast.Expr.Access(Optional.empty(), "expr3")
                         )
                 )
         );
