@@ -18,15 +18,15 @@ import java.util.stream.Stream;
  * Standard JUnit5 parameterized tests. See the RegexTests file from Homework 1
  * or the LexerTests file from the last project part for more information.
  */
-final class ParserTests_JERNULLS {
+final class ParserTests_Catches_JERNULLS {
 
 
 
     @ParameterizedTest
     @MethodSource
     void testSource(String test, List<Token> tokens, Ast.Source expected) {
-//        test(tokens, null, Parser::parseSource);
-        test(tokens, null, Parser::parseSource);
+//        test(tokens, expected, Parser::parseSource);
+        test(tokens, expected, Parser::parseSource);
     }
 
     private static Stream<Arguments> testSource() {
@@ -100,8 +100,8 @@ final class ParserTests_JERNULLS {
     @ParameterizedTest
     @MethodSource
     void testExpressionStatement(String test, List<Token> tokens, Ast.Stmt.Expression expected) {
-        // test(tokens, null, Parser::parseStatement);
-        test(tokens, null, Parser::parseStatement);
+        // test(tokens, expected, Parser::parseStatement);
+        test(tokens, expected, Parser::parseStatement);
     }
 
     private static Stream<Arguments> testExpressionStatement() {
@@ -139,7 +139,7 @@ final class ParserTests_JERNULLS {
     @ParameterizedTest
     @MethodSource
     void testDeclarationStatement(String test, List<Token> tokens, Ast.Stmt.Declaration expected) {
-        test(tokens, null, Parser::parseStatement);
+        test(tokens, expected, Parser::parseStatement);
     }
 
     private static Stream<Arguments> testDeclarationStatement() {
@@ -183,7 +183,7 @@ final class ParserTests_JERNULLS {
     @ParameterizedTest
     @MethodSource
     void testAssignmentStatement(String test, List<Token> tokens, Ast.Stmt.Assignment expected) {
-        test(tokens, null, Parser::parseStatement);
+        test(tokens, expected, Parser::parseStatement);
     }
 
     private static Stream<Arguments> testAssignmentStatement() {
@@ -220,7 +220,7 @@ final class ParserTests_JERNULLS {
     @ParameterizedTest
     @MethodSource
     void testIfStatement(String test, List<Token> tokens, Ast.Stmt.If expected) {
-        test(tokens, null, Parser::parseStatement);
+        test(tokens, expected, Parser::parseStatement);
     }
 
     private static Stream<Arguments> testIfStatement() {
@@ -281,7 +281,7 @@ final class ParserTests_JERNULLS {
     @ParameterizedTest
     @MethodSource
     void testForStatement(String test, List<Token> tokens, Ast.Stmt.For expected) {
-        test(tokens, null, Parser::parseStatement);
+        test(tokens, expected, Parser::parseStatement);
     }
 
     private static Stream<Arguments> testForStatement() {
@@ -330,7 +330,7 @@ final class ParserTests_JERNULLS {
     @ParameterizedTest
     @MethodSource
     void testWhileStatement(String test, List<Token> tokens, Ast.Stmt.While expected) {
-        test(tokens, null, Parser::parseStatement);
+        test(tokens, expected, Parser::parseStatement);
     }
 
     private static Stream<Arguments> testWhileStatement() {
@@ -390,7 +390,7 @@ final class ParserTests_JERNULLS {
     @ParameterizedTest
     @MethodSource
     void testReturnStatement(String test, List<Token> tokens, Ast.Stmt.Return expected) {
-        test(tokens, null, Parser::parseStatement);
+        test(tokens, expected, Parser::parseStatement);
     }
 
     private static Stream<Arguments> testReturnStatement() {
@@ -418,7 +418,7 @@ final class ParserTests_JERNULLS {
     @ParameterizedTest
     @MethodSource
     void testLiteralExpression(String test, List<Token> tokens, Ast.Expr.Literal expected) {
-        test(tokens, null, Parser::parseExpression);
+        test(tokens, expected, Parser::parseExpression);
     }
 
     private static Stream<Arguments> testLiteralExpression() {
@@ -489,7 +489,7 @@ final class ParserTests_JERNULLS {
     @ParameterizedTest
     @MethodSource
     void testGroupExpression(String test, List<Token> tokens, Ast.Expr.Group expected) {
-        test(tokens, null, Parser::parseExpression);
+        test(tokens, expected, Parser::parseExpression);
     }
 
     private static Stream<Arguments> testGroupExpression() {
@@ -531,7 +531,7 @@ final class ParserTests_JERNULLS {
     @ParameterizedTest
     @MethodSource
     void testBinaryExpression(String test, List<Token> tokens, Ast.Expr.Binary expected) {
-        test(tokens, null, Parser::parseExpression);
+        test(tokens, expected, Parser::parseExpression);
     }
 
     private static Stream<Arguments> testBinaryExpression() {
@@ -633,7 +633,7 @@ final class ParserTests_JERNULLS {
     @ParameterizedTest
     @MethodSource
     void testAccessExpression(String test, List<Token> tokens, Ast.Expr.Access expected) {
-        test(tokens, null, Parser::parseExpression);
+        test(tokens, expected, Parser::parseExpression);
     }
 
     private static Stream<Arguments> testAccessExpression() {
@@ -666,7 +666,7 @@ final class ParserTests_JERNULLS {
     @ParameterizedTest
     @MethodSource
     void testFunctionExpression(String test, List<Token> tokens, Ast.Expr.Function expected) {
-        test(tokens, null, Parser::parseExpression);
+        test(tokens, expected, Parser::parseExpression);
     }
 
     private static Stream<Arguments> testFunctionExpression() {
@@ -797,7 +797,7 @@ final class ParserTests_JERNULLS {
                         )
                 ))
         ));
-        test(input, null, Parser::parseSource);
+        test(input, expected, Parser::parseSource);
     }
 
     /**
