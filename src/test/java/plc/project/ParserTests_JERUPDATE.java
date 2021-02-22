@@ -64,30 +64,6 @@ final class ParserTests_JERUPDATE {
                                         new Ast.Stmt.Expression(new Ast.Expr.Access(Optional.empty(), "stmt"))
                                 )))
                         )
-                ),
-                Arguments.of("Method Field",
-                        Arrays.asList(
-                                //DEF name() DO stmt; END
-                                new Token(Token.Type.IDENTIFIER, "DEF", 0),
-                                new Token(Token.Type.IDENTIFIER, "name", 4),
-                                new Token(Token.Type.OPERATOR, "(", 8),
-                                new Token(Token.Type.OPERATOR, ")", 9),
-                                new Token(Token.Type.IDENTIFIER, "DO", 11),
-                                new Token(Token.Type.IDENTIFIER, "stmt", 14),
-                                new Token(Token.Type.OPERATOR, ";", 18),
-                                new Token(Token.Type.IDENTIFIER, "END", 20),
-                                new Token(Token.Type.IDENTIFIER, "LET", 24),
-                                new Token(Token.Type.IDENTIFIER, "name", 28),
-                                new Token(Token.Type.OPERATOR, "=", 33),
-                                new Token(Token.Type.IDENTIFIER, "expr", 35),
-                                new Token(Token.Type.OPERATOR, ";", 40)
-                        ),
-                        new Ast.Source(
-                                Arrays.asList(),
-                                Arrays.asList(new Ast.Method("name", Arrays.asList(), Arrays.asList(
-                                        new Ast.Stmt.Expression(new Ast.Expr.Access(Optional.empty(), "stmt"))
-                                )))
-                        )
                 )
         );
     }

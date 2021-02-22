@@ -38,32 +38,37 @@ public final class Parser {
     public Ast.Source parseSource() throws ParseException {
         List<Ast.Field> fields = new ArrayList<Ast.Field>();
         List<Ast.Method> methods = new ArrayList<Ast.Method>();
+        try {
+            if (tokens.has(0) && peek(Token.Type.IDENTIFIER)) {
+                while (peek(Token.Type.IDENTIFIER)) {
 
-        while (peek(Token.Type.IDENTIFIER)) {
-            try {
-                // Try field
-                if (peek("LET")) {
-                    while (peek("LET")) {
-                        fields.add(parseField());
-                        if (tokens.has(0) && (!peek("LET") && !peek("DEF")))
-                            throw new ParseException("not let or def", tokens.index);
+                    // Try field
+                    if (peek("LET")) {
+                        while (peek("LET")) {
+                            fields.add(parseField());
+                            if (tokens.has(0) && (!peek("LET") && !peek("DEF")))
+                                throw new ParseException("not let or def", tokens.get(0).getIndex());
+                        }
+                    }
+                    if (peek("DEF")) {
+                        while (peek("DEF")) {
+                            methods.add(parseMethod());
+                            if (tokens.has(0) && !peek("DEF"))
+                                throw new ParseException("not def", tokens.get(0).getIndex());
+                        }
                     }
                 }
-                if (peek("DEF")) {
-                    while (peek("DEF")) {
-                        methods.add(parseMethod());
-                        if (tokens.has(0) && !peek("DEF"))
-                            throw new ParseException("not def", tokens.index);
-                    }
-                }
-            } catch (ParseException p) {
-                System.out.println("ERROR AT: " + tokens.index + ", - OFFENDER: " + tokens.get(0).getLiteral());
-                System.out.println(tokens.index);
-                System.out.println(p.getIndex());
-                throw new ParseException("testing", tokens.index);
             }
+            
+            if (!tokens.has(0))
+                return new Ast.Source(fields, methods);
+            else
+                throw new ParseException("illegal id", tokens.get(0).getIndex());
+
+        } catch (ParseException p) {
+            System.out.println("ERROR AT: " + p.getIndex() + ", - OFFENDER: " + p.getMessage());
+            throw new ParseException(p.getMessage(), p.getIndex());
         }
-        return new Ast.Source(fields, methods);
     }
 
     /**
@@ -79,8 +84,12 @@ public final class Parser {
             if (peek(Token.Type.IDENTIFIER)) {
                 name = tokens.get(0).getLiteral();
                 match(Token.Type.IDENTIFIER);
-            } else
-                throw new ParseException("no identifier", tokens.index);
+            } else {
+                if (tokens.has(0))
+                    throw new ParseException("no identifier", tokens.get(0).getIndex());
+                else
+                    throw new ParseException("no identifier", tokens.get(-1).getIndex() + tokens.get(-1).getLiteral().length());
+            }
 
             if (peek("=")) {
                 match("=");
@@ -88,14 +97,22 @@ public final class Parser {
                 if (peek(";")) {
                     match(";");
                     return new Ast.Field(name, Optional.of(value));
-                } else
-                    throw new ParseException("no ;", tokens.index);
+                } else {
+                    if (tokens.has(0))
+                        throw new ParseException("no ;", tokens.get(0).getIndex());
+                    else
+                        throw new ParseException("no  ;", tokens.get(-1).getIndex() + tokens.get(-1).getLiteral().length());
+                }
             } else {
                 if (peek(";")) {
                     match(";");
                     return new Ast.Field(name, Optional.empty());
-                } else
-                    throw new ParseException("no ;", tokens.index);
+                } else {
+                    if (tokens.has(0))
+                        throw new ParseException("no ;", tokens.get(0).getIndex());
+                    else
+                        throw new ParseException("no  ;", tokens.get(-1).getIndex() + tokens.get(-1).getLiteral().length());
+                }
             }
         } catch (ParseException p) {
             System.out.println("ERROR: Line " + p.getIndex() + ". Type: " + p.getMessage());
@@ -117,14 +134,22 @@ public final class Parser {
             if (peek(Token.Type.IDENTIFIER)) {
                 name = tokens.get(0).getLiteral();
                 match(Token.Type.IDENTIFIER);
-            } else
-                throw new ParseException("no identifier", tokens.index);
+            } else {
+                if (tokens.has(0))
+                    throw new ParseException("no identifier", tokens.get(0).getIndex());
+                else
+                    throw new ParseException("no identifier", tokens.get(-1).getIndex() + tokens.get(-1).getLiteral().length());
+            }
 
             // Check (
             if (peek("("))
                 match("(");
-            else
-                throw new ParseException("no (", tokens.index);
+            else {
+                if (tokens.has(0))
+                    throw new ParseException("no (", tokens.get(0).getIndex());
+                else
+                    throw new ParseException("no  ()", tokens.get(-1).getIndex() + tokens.get(-1).getLiteral().length());
+            }
 
             List<String> parameters = new ArrayList<String>();
 
@@ -136,21 +161,33 @@ public final class Parser {
                 if (peek(","))
                     match(",");
                 else {
-                    if (!peek(")"))
-                        throw new ParseException("no , before )", tokens.index);
+                    if (!peek(")")) {
+                        if (tokens.has(0))
+                            throw new ParseException("no , before )", tokens.get(0).getIndex());
+                        else
+                            throw new ParseException("no , before )", tokens.get(-1).getIndex() + tokens.get(-1).getLiteral().length());
+                    }
                 }
             }
 
             // Check )
             if (peek(")"))
                 match(")");
-            else
-                throw new ParseException("no )", tokens.index);
+            else {
+                if (tokens.has(0))
+                    throw new ParseException("no )", tokens.get(0).getIndex());
+                else
+                    throw new ParseException("no )", tokens.get(-1).getIndex());
+            }
 
             if (peek("DO"))
                 match("DO");
-            else
-                throw new ParseException("no DO", tokens.index);
+            else {
+                if (tokens.has(0))
+                    throw new ParseException("no DO", tokens.get(0).getIndex());
+                else
+                    throw new ParseException("no DO", tokens.get(-1).getIndex() + tokens.get(-1).getLiteral().length());
+            }
 
             List<Ast.Stmt> statements = new ArrayList<Ast.Stmt>();
 
@@ -161,8 +198,12 @@ public final class Parser {
             if (peek("END")) {
                 match("END");
                 return new Ast.Method(name, parameters, statements);
-            } else
-                throw new ParseException("no END", tokens.index);
+            } else {
+                if (tokens.has(0))
+                    throw new ParseException("no END", tokens.get(0).getIndex());
+                else
+                    throw new ParseException("no END", tokens.get(-1).getIndex() + tokens.get(-1).getLiteral().length());
+            }
         } catch (ParseException p) {
             System.out.println("ERROR: Line " + p.getIndex() + ". Type: " + p.getMessage());
         }
@@ -207,15 +248,24 @@ public final class Parser {
                     if (peek(";")) {
                         match(";");
                         return new Ast.Stmt.Assignment(current, value);
+                    } else {
+                        if (tokens.has(0))
+                            throw new ParseException("no ;", tokens.get(0).getIndex());
+                        else
+                            throw new ParseException("no ;",
+                                    tokens.get(-1).getIndex() + tokens.get(-1).getLiteral().length());
                     }
-                    else
-                        throw new ParseException("no ;", tokens.index);
                 } else {
                     if (peek(";")) {
                         match(";");
                         return new Ast.Stmt.Expression(current);
-                    } else
-                        throw new ParseException("no ;", tokens.index);
+                    } else {
+                        if (tokens.has(0))
+                            throw new ParseException("no ;", tokens.get(0).getIndex());
+                        else
+                            throw new ParseException("no ;",
+                                    tokens.get(-1).getIndex() + tokens.get(-1).getLiteral().length());
+                    }
                 }
             }
         } catch (ParseException p) {
@@ -240,8 +290,12 @@ public final class Parser {
             if (peek(Token.Type.IDENTIFIER)) {
                 name = tokens.get(0).getLiteral();
                 match(Token.Type.IDENTIFIER);
-            } else
-                throw new ParseException("no identifier", tokens.index);
+            } else {
+                if (tokens.has(0))
+                    throw new ParseException("no id", tokens.get(0).getIndex());
+                else
+                    throw new ParseException("no id", tokens.get(-1).getIndex() + tokens.get(-1).getLiteral().length());
+            }
 
             if (peek("=")) {
                 match("=");
@@ -249,15 +303,24 @@ public final class Parser {
                 if (peek(";")) {
                     match(";");
                     return new Ast.Stmt.Declaration(name, Optional.of(value));
+                } else {
+                    if (tokens.has(0))
+                        throw new ParseException("no ;", tokens.get(0).getIndex());
+                    else
+                        throw new ParseException("no ;",
+                                tokens.get(-1).getIndex() + tokens.get(-1).getLiteral().length());
                 }
-                else
-                    throw new ParseException("no ;", tokens.index);
             } else {
                 if (peek(";")) {
                     match(";");
                     return new Ast.Stmt.Declaration(name, Optional.empty());
-                } else
-                    throw new ParseException("no ;", tokens.index);
+                } else {
+                    if (tokens.has(0))
+                        throw new ParseException("no ;", tokens.get(0).getIndex());
+                    else
+                        throw new ParseException("no ;",
+                                tokens.get(-1).getIndex() + tokens.get(-1).getLiteral().length());
+                }
             }
         } catch (ParseException p) {
             System.out.println("ERROR: Line " + p.getIndex() + ". Type: " + p.getMessage());
@@ -294,10 +357,19 @@ public final class Parser {
                 if (peek("END")) {
                     match("END");
                     return new Ast.Stmt.If(condition, thenStatements, elseStatements);
-                } else
-                    throw new ParseException("no END", tokens.index);
-            } else
-                throw new ParseException("no DO", tokens.index);
+                } else {
+                    if (tokens.has(0))
+                        throw new ParseException("no END", tokens.get(0).getIndex());
+                    else
+                        throw new ParseException("no END",
+                                tokens.get(-1).getIndex() + tokens.get(-1).getLiteral().length());
+                }
+            } else {
+                if (tokens.has(0))
+                    throw new ParseException("no DO", tokens.get(0).getIndex());
+                else
+                    throw new ParseException("no DO", tokens.get(-1).getIndex() + tokens.get(-1).getLiteral().length());
+            }
         } catch (ParseException p) {
             System.out.println("ERROR: Line " + p.getIndex() + ". Type: " + p.getMessage());
         }
@@ -319,18 +391,33 @@ public final class Parser {
             if (peek(Token.Type.IDENTIFIER)) {
                 name = tokens.get(0).getLiteral();
                 match(Token.Type.IDENTIFIER);
-            } else
-                throw new ParseException("no identifier", tokens.index);
+            } else {
+                if (tokens.has(0))
+                    throw new ParseException("no identifier", tokens.get(0).getIndex());
+                else
+                    throw new ParseException("no identifier",
+                            tokens.get(-1).getIndex() + tokens.get(-1).getLiteral().length());
+            }
 
             if (peek("IN"))
                 match("IN");
-            else
-                throw new ParseException("no IN", tokens.index);
+            else {
+                if (tokens.has(0))
+                    throw new ParseException("no IN", tokens.get(0).getIndex());
+                else
+                    throw new ParseException("no IN", tokens.get(-1).getIndex() + tokens.get(-1).getLiteral().length());
+            }
+
             Ast.Expr value = parseExpression();
             if (peek("DO"))
                 match("DO");
-            else
-                throw new ParseException("no DO", tokens.index);
+            else {
+                if (tokens.has(0))
+                    throw new ParseException("no DO", tokens.get(0).getIndex());
+                else
+                    throw new ParseException("no DO", tokens.get(-1).getIndex() + tokens.get(-1).getLiteral().length());
+            }
+
             List<Ast.Stmt> statements = new ArrayList<Ast.Stmt>();
 
             while (!peek("END")) {
@@ -340,8 +427,13 @@ public final class Parser {
             if (peek("END")) {
                 match("END");
                 return new Ast.Stmt.For(name, value, statements);
-            } else
-                throw new ParseException("no END", tokens.index);
+            } else {
+                if (tokens.has(0))
+                    throw new ParseException("no END", tokens.get(0).getIndex());
+                else
+                    throw new ParseException("no END",
+                            tokens.get(-1).getIndex() + tokens.get(-1).getLiteral().length());
+            }
         } catch (ParseException p) {
             System.out.println("ERROR: Line " + p.getIndex() + ". Type: " + p.getMessage());
         }
@@ -362,8 +454,12 @@ public final class Parser {
 
             if (peek("DO"))
                 match("DO");
-            else
-                throw new ParseException("no DO", tokens.index);
+            else {
+                if (tokens.has(0))
+                    throw new ParseException("no DO", tokens.get(0).getIndex());
+                else
+                    throw new ParseException("no DO", tokens.get(-1).getIndex() + tokens.get(-1).getLiteral().length());
+            }
 
             List<Ast.Stmt> statements = new ArrayList<Ast.Stmt>();
 
@@ -373,8 +469,13 @@ public final class Parser {
             if (peek("END")) {
                 match("END");
                 return new Ast.Stmt.While(condition, statements);
-            } else
-                throw new ParseException("no END", tokens.index);
+            } else {
+                if (tokens.has(0))
+                    throw new ParseException("no END", tokens.get(0).getIndex());
+                else
+                    throw new ParseException("no END",
+                            tokens.get(-1).getIndex() + tokens.get(-1).getLiteral().length());
+            }
         } catch (ParseException p) {
             System.out.println("ERROR: Line " + p.getIndex() + ". Type: " + p.getMessage());
         }
@@ -397,8 +498,12 @@ public final class Parser {
             if (peek(";")) {
                 match(";");
                 return new Ast.Stmt.Return(value);
-            } else
-                throw new ParseException("no ;", tokens.index);
+            } else {
+                if (tokens.has(0))
+                    throw new ParseException("no ;", tokens.get(0).getIndex());
+                else
+                    throw new ParseException("no ;", tokens.get(-1).getIndex() + tokens.get(-1).getLiteral().length());
+            }
         } catch (ParseException p) {
             System.out.println("ERROR: Line " + p.getIndex() + ". Type: " + p.getMessage());
         }
@@ -547,8 +652,13 @@ public final class Parser {
                     if (peek(Token.Type.IDENTIFIER)) {
                         name = tokens.get(0).getLiteral();
                         match(Token.Type.IDENTIFIER);
-                    } else
-                        throw new ParseException("error", tokens.index);
+                    } else {
+                        if (tokens.has(0))
+                            throw new ParseException("no id", tokens.get(0).getIndex());
+                        else
+                            throw new ParseException("no id",
+                                    tokens.get(-1).getIndex() + tokens.get(-1).getLiteral().length());
+                    }
 
                     // Catch (
                     if (peek("(")) {
@@ -669,8 +779,13 @@ public final class Parser {
                 if (peek(")")) {
                     match(")");
                     return g;
-                } else
-                    throw new ParseException("error", tokens.index);
+                } else {
+                    if (tokens.has(0))
+                        throw new ParseException("no )", tokens.get(0).getIndex());
+                    else
+                        throw new ParseException("no )",
+                                tokens.get(-1).getIndex() + tokens.get(-1).getLiteral().length());
+                }
             }
 
             else if (peek(Token.Type.IDENTIFIER)) {
@@ -696,6 +811,12 @@ public final class Parser {
 
                 else
                     return new Ast.Expr.Access(Optional.empty(), name);
+            } else {
+                if (tokens.has(0))
+                    throw new ParseException("not sure what it is", tokens.get(0).getIndex());
+                else
+                    throw new ParseException("not sure what it is",
+                            tokens.get(-1).getIndex() + tokens.get(-1).getLiteral().length());
             }
         } catch (ParseException p) {
             System.out.println("ERROR: Line " + p.getIndex() + ". Type: " + p.getMessage());
