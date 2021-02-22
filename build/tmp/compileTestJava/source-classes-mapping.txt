@@ -8,7 +8,7 @@ plc/homework/RegexTests.java
  plc.homework.RegexTests
 plc/project/ParserTests.java
  plc.project.ParserTests
-plc/project/ParserTests_JERNULLS.java
- plc.project.ParserTests_JERNULLS
 plc/project/ParserTests_JERUPDATE.java
  plc.project.ParserTests_JERUPDATE
+plc/project/ParserTests_JERNULLS.java
+ plc.project.ParserTests_JERNULLS
