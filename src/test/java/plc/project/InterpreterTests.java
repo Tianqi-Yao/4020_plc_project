@@ -6,15 +6,104 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 final class InterpreterTests {
+
+    @ParameterizedTest
+    @MethodSource
+    void testSource(String test, Ast.Source ast, Object expected) {
+        test(ast, expected, new Scope(null));
+    }
+
+    private static Stream<Arguments> testSource() {
+        return Stream.of(
+                Arguments.of("Main", new Ast.Source(
+                        Arrays.asList(),
+                        Arrays.asList(new Ast.Method("main", Arrays.asList(), Arrays.asList(
+                                new Ast.Stmt.Return(new Ast.Expr.Literal(BigInteger.ZERO)))
+                        ))
+                ), BigInteger.ZERO),
+                Arguments.of("Fields & No Return", new Ast.Source(
+                        Arrays.asList(
+                                new Ast.Field("x", Optional.of(new Ast.Expr.Literal(BigInteger.ONE))),
+                                new Ast.Field("y", Optional.of(new Ast.Expr.Literal(BigInteger.TEN)))
+                        ),
+                        Arrays.asList(new Ast.Method("main", Arrays.asList(), Arrays.asList(
+                                new Ast.Stmt.Expression(new Ast.Expr.Binary("+",
+                                        new Ast.Expr.Access(Optional.empty(), "x"),
+                                        new Ast.Expr.Access(Optional.empty(), "y")                                ))
+                        )))
+                ), Environment.NIL.getValue())
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource
+    void testField(String test, Ast.Field ast, Object expected) {
+        Scope scope = test(ast, Environment.NIL.getValue(), new Scope(null));
+        Assertions.assertEquals(expected, scope.lookupVariable(ast.getName()).getValue().getValue());
+    }
+
+    private static Stream<Arguments> testField() {
+        return Stream.of(
+                Arguments.of("Declaration", new Ast.Field("name", Optional.empty()), Environment.NIL.getValue()),
+                Arguments.of("Initialization", new Ast.Field("name", Optional.of(new Ast.Expr.Literal(BigInteger.ONE))), BigInteger.ONE)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource
+    void testMethod(String test, Ast.Method ast, List<Environment.PlcObject> args, Object expected) {
+        Scope scope = test(ast, Environment.NIL.getValue(), new Scope(null));
+        Assertions.assertEquals(expected, scope.lookupFunction(ast.getName(), args.size()).invoke(args).getValue());
+    }
+
+    private static Stream<Arguments> testMethod() {
+        return Stream.of(
+                Arguments.of("Main",
+                        new Ast.Method("main", Arrays.asList(), Arrays.asList(
+                                new Ast.Stmt.Return(new Ast.Expr.Literal(BigInteger.ZERO)))
+                        ),
+                        Arrays.asList(),
+                        BigInteger.ZERO
+                ),
+                Arguments.of("Arguments",
+                        new Ast.Method("main", Arrays.asList("x"), Arrays.asList(
+                                new Ast.Stmt.Return(new Ast.Expr.Binary("*",
+                                        new Ast.Expr.Access(Optional.empty(), "x"),
+                                        new Ast.Expr.Access(Optional.empty(), "x")
+                                ))
+                        )),
+                        Arrays.asList(Environment.create(BigInteger.TEN)),
+                        BigInteger.valueOf(100)
+                )
+        );
+    }
+
+    @Test
+    void testExpressionStatement() {
+        PrintStream sysout = System.out;
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(out));
+        try {
+            test(new Ast.Stmt.Expression(
+                    new Ast.Expr.Function(Optional.empty(), "print", Arrays.asList(new Ast.Expr.Literal("Hello, World!")))
+            ), Environment.NIL.getValue(), new Scope(null));
+            Assertions.assertEquals("Hello, World!" + System.lineSeparator(), out.toString());
+        } finally {
+            System.setOut(sysout);
+        }
+    }
 
     @ParameterizedTest
     @MethodSource
@@ -58,26 +147,6 @@ final class InterpreterTests {
                 new Ast.Expr.Literal(BigInteger.ONE)
         ), Environment.NIL.getValue(), scope);
         Assertions.assertEquals(BigInteger.ONE, object.lookupVariable("field").getValue().getValue());
-    }
-
-    @Test
-    void testWhileStatement() {
-        Scope scope = new Scope(null);
-        scope.defineVariable("num", Environment.create(BigInteger.ZERO));
-        test(new Ast.Stmt.While(
-                new Ast.Expr.Binary("<",
-                        new Ast.Expr.Access(Optional.empty(),"num"),
-                        new Ast.Expr.Literal(BigInteger.TEN)
-                ),
-                Arrays.asList(new Ast.Stmt.Assignment(
-                        new Ast.Expr.Access(Optional.empty(),"num"),
-                        new Ast.Expr.Binary("+",
-                                new Ast.Expr.Access(Optional.empty(),"num"),
-                                new Ast.Expr.Literal(BigInteger.ONE)
-                        )
-                ))
-        ),Environment.NIL.getValue(), scope);
-        Assertions.assertEquals(BigInteger.TEN, scope.lookupVariable("num").getValue().getValue());
     }
 
     @ParameterizedTest
@@ -130,6 +199,26 @@ final class InterpreterTests {
         Assertions.assertEquals(BigInteger.TEN, scope.lookupVariable("sum").getValue().getValue());
     }
 
+    @Test
+    void testWhileStatement() {
+        Scope scope = new Scope(null);
+        scope.defineVariable("num", Environment.create(BigInteger.ZERO));
+        test(new Ast.Stmt.While(
+                new Ast.Expr.Binary("<",
+                        new Ast.Expr.Access(Optional.empty(),"num"),
+                        new Ast.Expr.Literal(BigInteger.TEN)
+                ),
+                Arrays.asList(new Ast.Stmt.Assignment(
+                        new Ast.Expr.Access(Optional.empty(),"num"),
+                        new Ast.Expr.Binary("+",
+                                new Ast.Expr.Access(Optional.empty(),"num"),
+                                new Ast.Expr.Literal(BigInteger.ONE)
+                        )
+                ))
+        ),Environment.NIL.getValue(), scope);
+        Assertions.assertEquals(BigInteger.TEN, scope.lookupVariable("num").getValue().getValue());
+    }
+
     @ParameterizedTest
     @MethodSource
     void testLiteralExpression(String test, Ast ast, Object expected) {
@@ -155,12 +244,12 @@ final class InterpreterTests {
 
     private static Stream<Arguments> testGroupExpression() {
         return Stream.of(
-                Arguments.of("Literal", new Ast.Expr.Literal(BigInteger.ONE), BigInteger.ONE),
+                Arguments.of("Literal", new Ast.Expr.Group(new Ast.Expr.Literal(BigInteger.ONE)), BigInteger.ONE),
                 Arguments.of("Binary",
-                        new Ast.Expr.Binary("+",
+                        new Ast.Expr.Group(new Ast.Expr.Binary("+",
                                 new Ast.Expr.Literal(BigInteger.ONE),
                                 new Ast.Expr.Literal(BigInteger.TEN)
-                        ),
+                        )),
                         BigInteger.valueOf(11)
                 )
         );

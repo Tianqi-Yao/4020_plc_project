@@ -1,3 +1,9 @@
+// Jeremy DePoyster
+// University of Florida
+// COP4020 Spring 2021 Online
+
+// Current as of 3/11/2021
+
 package plc.project;
 
 import java.math.BigDecimal;
@@ -6,6 +12,9 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+import plc.project.Environment.PlcObject;
 
 public class Interpreter implements Ast.Visitor<Environment.PlcObject> {
 
@@ -30,7 +39,12 @@ public class Interpreter implements Ast.Visitor<Environment.PlcObject> {
 
     @Override
     public Environment.PlcObject visit(Ast.Field ast) {
-        throw new UnsupportedOperationException(); //TODO
+        if (ast.getValue().isPresent())
+            scope.defineVariable(ast.getName(), visit(ast.getValue().get()));
+        else
+            scope.defineVariable(ast.getName(), Environment.NIL);
+
+        return Environment.NIL;
     }
 
     @Override
@@ -40,22 +54,62 @@ public class Interpreter implements Ast.Visitor<Environment.PlcObject> {
 
     @Override
     public Environment.PlcObject visit(Ast.Stmt.Expression ast) {
-        throw new UnsupportedOperationException(); //TODO
+        visit(ast.getExpression());
+        return Environment.NIL;
     }
 
     @Override
     public Environment.PlcObject visit(Ast.Stmt.Declaration ast) {
-        throw new UnsupportedOperationException(); //TODO (in lecture)
+        if (ast.getValue().isPresent())
+            scope.defineVariable(ast.getName(), visit(ast.getValue().get()));
+        else
+            scope.defineVariable(ast.getName(), Environment.NIL);
+
+        return Environment.NIL;
     }
 
     @Override
     public Environment.PlcObject visit(Ast.Stmt.Assignment ast) {
-        throw new UnsupportedOperationException(); //TODO
+        Ast.Expr.Access rec = requireType(Ast.Expr.Access.class, visit(ast.getReceiver()));
+        try {
+            scope = new Scope(scope);
+            if (rec.getReceiver().isPresent()) {
+                
+            }
+            else {
+
+            }
+        } finally {
+            scope = scope.getParent();
+        }
+            
+        return Environment.NIL;
     }
 
     @Override
     public Environment.PlcObject visit(Ast.Stmt.If ast) {
-        throw new UnsupportedOperationException(); //TODO
+        if (requireType(Boolean.class, visit(ast.getCondition()))) {
+            try {
+                scope = new Scope(scope);
+                for (Ast.Stmt stmt : ast.getThenStatements()) {
+                    visit(stmt);
+                }
+            } finally {
+                scope = scope.getParent();
+            }
+        }
+        else if (!requireType(Boolean.class, visit(ast.getCondition()))) {
+            try {
+                scope = new Scope(scope);
+                for (Ast.Stmt stmt : ast.getElseStatements()) {
+                    visit(stmt);
+                }
+            } finally {
+                scope = scope.getParent();
+            }
+        }
+        
+        return Environment.NIL;
     }
 
     @Override
@@ -65,32 +119,94 @@ public class Interpreter implements Ast.Visitor<Environment.PlcObject> {
 
     @Override
     public Environment.PlcObject visit(Ast.Stmt.While ast) {
-        throw new UnsupportedOperationException(); //TODO (in lecture)
+        while (requireType(Boolean.class, visit(ast.getCondition()))) {
+            try {
+                scope = new Scope(scope);
+                for (Ast.Stmt stmt : ast.getStatements()) {
+                    visit(stmt);
+                }
+            } finally {
+                scope = scope.getParent();
+            }
+        }
+        
+        return Environment.NIL;
     }
 
     @Override
     public Environment.PlcObject visit(Ast.Stmt.Return ast) {
-        throw new UnsupportedOperationException(); //TODO
+        throw new Return(visit(ast.getValue()));
     }
 
     @Override
     public Environment.PlcObject visit(Ast.Expr.Literal ast) {
-        throw new UnsupportedOperationException(); //TODO
+        if (ast.getLiteral() == null)
+            return Environment.NIL;
+        else
+            return Environment.create(ast.getLiteral());
     }
 
     @Override
     public Environment.PlcObject visit(Ast.Expr.Group ast) {
-        throw new UnsupportedOperationException(); //TODO
+        return visit(ast.getExpression());
     }
 
     @Override
     public Environment.PlcObject visit(Ast.Expr.Binary ast) {
-        throw new UnsupportedOperationException(); //TODO
+        String op = ast.getOperator();
+            if (op.equals("AND")) {
+                if (requireType(Boolean.class, visit(ast.getLeft())) == requireType(Boolean.class, visit(ast.getRight())))
+                    return visit(ast.getLeft());
+                else
+                    return Environment.create(Boolean.FALSE);
+            }
+            else if (op.equals("OR")) {
+                if (requireType(Boolean.class, visit(ast.getLeft())) == Boolean.TRUE)
+                    return visit(ast.getLeft());
+                else if (requireType(Boolean.class, visit(ast.getRight())) == Boolean.TRUE)
+                    return visit(ast.getRight());
+                else
+                    return Environment.create(Boolean.FALSE);
+            }
+            else if (op.equals("<") || op.equals("<=") || op.equals(">") || op.equals(">="))
+                if (visit(ast.getLeft()).getValue() instanceof Comparable && visit(ast.getLeft()).getValue().getClass() == visit(ast.getRight()).getValue().getClass()) {
+                    int compare;
+
+                    // Ugly, but works for now
+                    if (visit(ast.getLeft()).getValue().getClass() == BigInteger.class)
+                        compare = BigInteger.class.cast(visit(ast.getLeft()).getValue()).compareTo(BigInteger.class.cast(visit(ast.getRight()).getValue()));
+                    else if (visit(ast.getLeft()).getValue().getClass() == BigDecimal.class)
+                        compare = BigDecimal.class.cast(visit(ast.getLeft()).getValue()).compareTo(BigDecimal.class.cast(visit(ast.getRight()).getValue()));
+                    else
+                        throw new RuntimeException("Unsure of types");
+
+                    switch (op) {
+                        case "<":
+                            if (compare < 0)
+                                return Environment.create(Boolean.TRUE);
+                            else
+                                return Environment.create(Boolean.FALSE);
+                        case "<=":
+                            if (compare <= 0)
+                                return Environment.create(Boolean.TRUE);
+                            else
+                                return Environment.create(Boolean.FALSE);
+                    }
+                }
+                else
+                    throw new RuntimeException("Wrong types");
+
+        return Environment.NIL;
+
     }
 
     @Override
     public Environment.PlcObject visit(Ast.Expr.Access ast) {
-        throw new UnsupportedOperationException(); //TODO
+        if (ast.getReceiver().isPresent()) {
+            PlcObject rec = visit(ast.getReceiver().get()); // Can remove this var later
+            return rec.getField(ast.getName()).getValue();
+        }
+        return scope.lookupVariable(ast.getName()).getValue();
     }
 
     @Override
@@ -105,7 +221,7 @@ public class Interpreter implements Ast.Visitor<Environment.PlcObject> {
         if (type.isInstance(object.getValue())) {
             return type.cast(object.getValue());
         } else {
-            throw new RuntimeException("Expected type " + type.getName() + ", received " + object.getValue().getClass().getName() + "."); //TODO
+            throw new RuntimeException("Expected type " + type.getName() + ", received " + object.getValue().getClass().getName() + ".");
         }
     }
 
