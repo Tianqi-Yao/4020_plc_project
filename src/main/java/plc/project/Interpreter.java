@@ -11,8 +11,11 @@ import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import javax.management.RuntimeErrorException;
 
 import plc.project.Environment.PlcObject;
 
@@ -70,19 +73,22 @@ public class Interpreter implements Ast.Visitor<Environment.PlcObject> {
 
     @Override
     public Environment.PlcObject visit(Ast.Stmt.Assignment ast) {
-        Ast.Expr.Access rec = requireType(Ast.Expr.Access.class, visit(ast.getReceiver()));
-        try {
-            scope = new Scope(scope);
-            if (rec.getReceiver().isPresent()) {
-                
+        if (ast.getReceiver().getClass() == Ast.Expr.Access.class) {
+            try {
+                scope = new Scope(scope);
+                Ast.Expr.Access temp = Ast.Expr.Access.class.cast(ast.getReceiver());
+                if (temp.getReceiver().isPresent()) {
+                    Ast.Expr.Access rec = Ast.Expr.Access.class.cast(temp.getReceiver().get());
+                    scope.lookupVariable(rec.getName()).getValue().setField(temp.getName(), visit(ast.getValue()));
+                }
+                else
+                    scope.lookupVariable(temp.getName()).setValue(visit(ast.getValue()));
+            } finally {
+                scope = scope.getParent();
             }
-            else {
-
-            }
-        } finally {
-            scope = scope.getParent();
         }
-            
+        else
+            throw new RuntimeException("Not Access Type");
         return Environment.NIL;
     }
 
@@ -108,7 +114,6 @@ public class Interpreter implements Ast.Visitor<Environment.PlcObject> {
                 scope = scope.getParent();
             }
         }
-        
         return Environment.NIL;
     }
 
@@ -129,7 +134,6 @@ public class Interpreter implements Ast.Visitor<Environment.PlcObject> {
                 scope = scope.getParent();
             }
         }
-        
         return Environment.NIL;
     }
 
@@ -174,23 +178,9 @@ public class Interpreter implements Ast.Visitor<Environment.PlcObject> {
         else if (op.equals("<") || op.equals("<=") || op.equals(">") || op.equals(">=")) {
             if (visit(ast.getLeft()).getValue() instanceof Comparable && visit(ast.getLeft()).getValue().getClass() == visit(ast.getRight()).getValue().getClass()) {
                 int compare;
-
                 Comparable<Object> left = (Comparable<Object>)visit(ast.getLeft()).getValue();
                 Comparable<Object> right = (Comparable<Object>)visit(ast.getRight()).getValue();
-
                 compare = left.compareTo(right);
-
-                // // OLD WAY, IGNORE:
-                // if (visit(ast.getLeft()).getValue().getClass() == BigInteger.class)
-                //     compare = BigInteger.class.cast(visit(ast.getLeft()).getValue()).compareTo(BigInteger.class.cast(visit(ast.getRight()).getValue()));
-                // else if (visit(ast.getLeft()).getValue().getClass() == BigDecimal.class)
-                //     compare = BigDecimal.class.cast(visit(ast.getLeft()).getValue()).compareTo(BigDecimal.class.cast(visit(ast.getRight()).getValue()));
-                // else if (visit(ast.getLeft()).getValue().getClass() == String.class)
-                //     compare = String.class.cast(visit(ast.getLeft()).getValue()).compareTo(String.class.cast(visit(ast.getRight()).getValue()));
-                // else if (visit(ast.getLeft()).getValue().getClass() == Character.class)
-                //     compare = Character.class.cast(visit(ast.getLeft()).getValue()).compareTo(Character.class.cast(visit(ast.getRight()).getValue()));
-                // else
-                //     throw new RuntimeException("Unsure of types");
 
                 switch (op) {
                     case "<":
@@ -266,21 +256,17 @@ public class Interpreter implements Ast.Visitor<Environment.PlcObject> {
 
         else if (op.equals("/")) {
             if ((visit(ast.getLeft()).getValue().getClass() == BigDecimal.class || visit(ast.getLeft()).getValue().getClass() == BigInteger.class) && visit(ast.getLeft()).getValue().getClass() == visit(ast.getRight()).getValue().getClass()) {
-                if (visit(ast.getLeft()).getValue().getClass() == BigInteger.class) {
-                    if (op.equals("*"))
-                        return Environment.create(BigInteger.class.cast(visit(ast.getLeft()).getValue()).multiply(BigInteger.class.cast(visit(ast.getRight()).getValue())));
-                    else
-                        return Environment.create(BigInteger.class.cast(visit(ast.getLeft()).getValue()).subtract(BigInteger.class.cast(visit(ast.getRight()).getValue())));
-                }
-                else if (visit(ast.getLeft()).getValue().getClass() == BigDecimal.class && visit(ast.getLeft()).getValue().getClass() == visit(ast.getRight()).getValue().getClass()) {
-                    if (op.equals("*"))
-                        return Environment.create(BigDecimal.class.cast(visit(ast.getLeft()).getValue()).multiply(BigDecimal.class.cast(visit(ast.getRight()).getValue())));
-                    else
-                        return Environment.create(BigDecimal.class.cast(visit(ast.getLeft()).getValue()).subtract(BigDecimal.class.cast(visit(ast.getRight()).getValue())));
-                }
+                // Catch Div by 0
+                if ((visit(ast.getRight()).getValue().getClass() == BigDecimal.class && visit(ast.getRight()).getValue().equals(BigDecimal.ZERO)) || (visit(ast.getRight()).getValue().getClass() == BigInteger.class && visit(ast.getRight()).getValue().equals(BigInteger.ZERO)))
+                    throw new RuntimeException("Div by 0");
+                // Divide
+                if (visit(ast.getLeft()).getValue().getClass() == BigDecimal.class)
+                    return Environment.create(BigDecimal.class.cast(visit(ast.getLeft()).getValue()).divide(BigDecimal.class.cast(visit(ast.getRight()).getValue()), RoundingMode.HALF_EVEN));
+                else
+                    return Environment.create(BigInteger.class.cast(visit(ast.getLeft()).getValue()).divide(BigInteger.class.cast(visit(ast.getRight()).getValue())));
             }
             else
-                throw new RuntimeException("Tried to - or * with wrong type");
+                throw new RuntimeException("Tried to / with wrong type");
         }
 
         throw new RuntimeException("Wrong types");

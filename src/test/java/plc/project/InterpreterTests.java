@@ -339,6 +339,41 @@ final class InterpreterTests {
                                 new Ast.Expr.Literal(new BigDecimal("3.4"))
                         ),
                         new BigDecimal("0.4")
+                ),
+                Arguments.of("Division Int",
+                        new Ast.Expr.Binary("/",
+                                new Ast.Expr.Literal(new BigInteger("8")),
+                                new Ast.Expr.Literal(new BigInteger("4"))
+                        ),
+                        new BigInteger("2")
+                ),
+                Arguments.of("Division 0",
+                        new Ast.Expr.Binary("/",
+                                new Ast.Expr.Literal(new BigDecimal("1.2")),
+                                new Ast.Expr.Literal(new BigDecimal("0"))
+                        ),
+                        new BigDecimal("0")
+                ),
+                Arguments.of("Division 0 Int",
+                        new Ast.Expr.Binary("/",
+                                new Ast.Expr.Literal(new BigInteger("5")),
+                                new Ast.Expr.Literal(new BigInteger("0"))
+                        ),
+                        new BigInteger("0")
+                ),
+                Arguments.of("Division Mix Int",
+                        new Ast.Expr.Binary("/",
+                                new Ast.Expr.Literal(new BigInteger("8")),
+                                new Ast.Expr.Literal(new BigDecimal("4"))
+                        ),
+                        new BigDecimal("2")
+                ),
+                Arguments.of("Division Err",
+                        new Ast.Expr.Binary("/",
+                                new Ast.Expr.Literal(new BigDecimal("1.2")),
+                                new Ast.Expr.Literal(new String("3.4"))
+                        ),
+                        new BigDecimal("0.4")
                 )
         );
     }
