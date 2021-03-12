@@ -154,50 +154,93 @@ public class Interpreter implements Ast.Visitor<Environment.PlcObject> {
     @Override
     public Environment.PlcObject visit(Ast.Expr.Binary ast) {
         String op = ast.getOperator();
-            if (op.equals("AND")) {
-                if (requireType(Boolean.class, visit(ast.getLeft())) == requireType(Boolean.class, visit(ast.getRight())))
-                    return visit(ast.getLeft());
-                else
-                    return Environment.create(Boolean.FALSE);
-            }
-            else if (op.equals("OR")) {
-                if (requireType(Boolean.class, visit(ast.getLeft())) == Boolean.TRUE)
-                    return visit(ast.getLeft());
-                else if (requireType(Boolean.class, visit(ast.getRight())) == Boolean.TRUE)
-                    return visit(ast.getRight());
-                else
-                    return Environment.create(Boolean.FALSE);
-            }
-            else if (op.equals("<") || op.equals("<=") || op.equals(">") || op.equals(">="))
-                if (visit(ast.getLeft()).getValue() instanceof Comparable && visit(ast.getLeft()).getValue().getClass() == visit(ast.getRight()).getValue().getClass()) {
-                    int compare;
+        if (op.equals("AND")) {
+            if (requireType(Boolean.class, visit(ast.getLeft())) == requireType(Boolean.class, visit(ast.getRight())))
+                return visit(ast.getLeft());
+            else
+                return Environment.create(Boolean.FALSE);
+        }
+        
+        else if (op.equals("OR")) {
+            if (requireType(Boolean.class, visit(ast.getLeft())) == Boolean.TRUE)
+                return visit(ast.getLeft());
+            else if (requireType(Boolean.class, visit(ast.getRight())) == Boolean.TRUE)
+                return visit(ast.getRight());
+            else
+                return Environment.create(Boolean.FALSE);
+        }
 
-                    // Ugly, but works for now
-                    if (visit(ast.getLeft()).getValue().getClass() == BigInteger.class)
-                        compare = BigInteger.class.cast(visit(ast.getLeft()).getValue()).compareTo(BigInteger.class.cast(visit(ast.getRight()).getValue()));
-                    else if (visit(ast.getLeft()).getValue().getClass() == BigDecimal.class)
-                        compare = BigDecimal.class.cast(visit(ast.getLeft()).getValue()).compareTo(BigDecimal.class.cast(visit(ast.getRight()).getValue()));
-                    else
-                        throw new RuntimeException("Unsure of types");
+        else if (op.equals("<") || op.equals("<=") || op.equals(">") || op.equals(">=")) {
+            if (visit(ast.getLeft()).getValue() instanceof Comparable && visit(ast.getLeft()).getValue().getClass() == visit(ast.getRight()).getValue().getClass()) {
+                int compare;
 
-                    switch (op) {
-                        case "<":
-                            if (compare < 0)
-                                return Environment.create(Boolean.TRUE);
-                            else
-                                return Environment.create(Boolean.FALSE);
-                        case "<=":
-                            if (compare <= 0)
-                                return Environment.create(Boolean.TRUE);
-                            else
-                                return Environment.create(Boolean.FALSE);
-                    }
+                // Ugly, but works for now
+                if (visit(ast.getLeft()).getValue().getClass() == BigInteger.class)
+                    compare = BigInteger.class.cast(visit(ast.getLeft()).getValue()).compareTo(BigInteger.class.cast(visit(ast.getRight()).getValue()));
+                else if (visit(ast.getLeft()).getValue().getClass() == BigDecimal.class)
+                    compare = BigDecimal.class.cast(visit(ast.getLeft()).getValue()).compareTo(BigDecimal.class.cast(visit(ast.getRight()).getValue()));
+                else
+                    throw new RuntimeException("Unsure of types");
+
+                switch (op) {
+                    case "<":
+                        if (compare < 0)
+                            return Environment.create(Boolean.TRUE);
+                        else
+                            return Environment.create(Boolean.FALSE);
+                    case "<=":
+                        if (compare <= 0)
+                            return Environment.create(Boolean.TRUE);
+                        else
+                            return Environment.create(Boolean.FALSE);
+                    case ">":
+                        if (compare > 0)
+                            return Environment.create(Boolean.TRUE);
+                        else
+                            return Environment.create(Boolean.FALSE);
+                    case ">=":
+                        if (compare >= 0)
+                            return Environment.create(Boolean.TRUE);
+                        else
+                            return Environment.create(Boolean.FALSE);
                 }
-                else
-                    throw new RuntimeException("Wrong types");
+            }
+        }
 
-        return Environment.NIL;
+        else if (op.equals("==") || op.equals("!=")) {
+            switch (op) {
+                case "==":
+                    if (visit(ast.getLeft()).getValue().equals(visit(ast.getRight()).getValue()))
+                        return Environment.create(Boolean.TRUE);
+                    else
+                        return Environment.create(Boolean.FALSE);
+                case "!=":
+                    if (visit(ast.getLeft()).getValue().equals(visit(ast.getRight()).getValue()))
+                        return Environment.create(Boolean.FALSE);
+                    else
+                        return Environment.create(Boolean.TRUE);
+            }
+        }
 
+        else if (op.equals("+")) {
+            // String
+            if (visit(ast.getLeft()).getValue().getClass() == String.class || visit(ast.getLeft()).getValue().getClass() == String.class) {
+                // Concat String OR String + Int / Dec
+                // TODO
+            }
+            else if (visit(ast.getLeft()).getValue().getClass() == BigInteger.class && visit(ast.getLeft()).getValue().getClass() == visit(ast.getRight()).getValue().getClass()) {
+                BigInteger temp = BigInteger.class.cast(visit(ast.getLeft()).getValue()).add(BigInteger.class.cast(visit(ast.getRight()).getValue()));
+                return Environment.create(temp);
+            }
+            else if (visit(ast.getLeft()).getValue().getClass() == BigDecimal.class && visit(ast.getLeft()).getValue().getClass() == visit(ast.getRight()).getValue().getClass()) {
+                BigDecimal temp = BigDecimal.class.cast(visit(ast.getLeft()).getValue()).add(BigDecimal.class.cast(visit(ast.getRight()).getValue()));
+                return Environment.create(temp);
+            }
+            else
+                throw new RuntimeException("Wrong Concat types");
+        }
+
+        throw new RuntimeException("Wrong types");
     }
 
     @Override

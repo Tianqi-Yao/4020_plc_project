@@ -298,6 +298,13 @@ final class InterpreterTests {
                         ),
                         false
                 ),
+                Arguments.of("Not Equal",
+                        new Ast.Expr.Binary("!=",
+                                new Ast.Expr.Literal(BigInteger.ONE),
+                                new Ast.Expr.Literal(BigInteger.TEN)
+                        ),
+                        true
+                ),
                 Arguments.of("Concatenation",
                         new Ast.Expr.Binary("+",
                                 new Ast.Expr.Literal("a"),
