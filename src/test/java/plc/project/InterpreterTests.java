@@ -319,6 +319,20 @@ final class InterpreterTests {
                         ),
                         BigInteger.valueOf(11)
                 ),
+                Arguments.of("Subtraction",
+                        new Ast.Expr.Binary("-",
+                                new Ast.Expr.Literal(BigInteger.ONE),
+                                new Ast.Expr.Literal(BigInteger.TEN)
+                        ),
+                        BigInteger.valueOf(-9)
+                ),
+                Arguments.of("Multiplication",
+                        new Ast.Expr.Binary("*",
+                                new Ast.Expr.Literal(BigInteger.ONE),
+                                new Ast.Expr.Literal(BigInteger.TEN)
+                        ),
+                        BigInteger.valueOf(10)
+                ),
                 Arguments.of("Division",
                         new Ast.Expr.Binary("/",
                                 new Ast.Expr.Literal(new BigDecimal("1.2")),

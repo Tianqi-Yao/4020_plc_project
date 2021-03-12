@@ -154,6 +154,7 @@ public class Interpreter implements Ast.Visitor<Environment.PlcObject> {
     @Override
     public Environment.PlcObject visit(Ast.Expr.Binary ast) {
         String op = ast.getOperator();
+
         if (op.equals("AND")) {
             if (requireType(Boolean.class, visit(ast.getLeft())) == requireType(Boolean.class, visit(ast.getRight())))
                 return visit(ast.getLeft());
@@ -174,13 +175,22 @@ public class Interpreter implements Ast.Visitor<Environment.PlcObject> {
             if (visit(ast.getLeft()).getValue() instanceof Comparable && visit(ast.getLeft()).getValue().getClass() == visit(ast.getRight()).getValue().getClass()) {
                 int compare;
 
-                // Ugly, but works for now
-                if (visit(ast.getLeft()).getValue().getClass() == BigInteger.class)
-                    compare = BigInteger.class.cast(visit(ast.getLeft()).getValue()).compareTo(BigInteger.class.cast(visit(ast.getRight()).getValue()));
-                else if (visit(ast.getLeft()).getValue().getClass() == BigDecimal.class)
-                    compare = BigDecimal.class.cast(visit(ast.getLeft()).getValue()).compareTo(BigDecimal.class.cast(visit(ast.getRight()).getValue()));
-                else
-                    throw new RuntimeException("Unsure of types");
+                Comparable<Object> left = (Comparable<Object>)visit(ast.getLeft()).getValue();
+                Comparable<Object> right = (Comparable<Object>)visit(ast.getRight()).getValue();
+
+                compare = left.compareTo(right);
+
+                // // OLD WAY, IGNORE:
+                // if (visit(ast.getLeft()).getValue().getClass() == BigInteger.class)
+                //     compare = BigInteger.class.cast(visit(ast.getLeft()).getValue()).compareTo(BigInteger.class.cast(visit(ast.getRight()).getValue()));
+                // else if (visit(ast.getLeft()).getValue().getClass() == BigDecimal.class)
+                //     compare = BigDecimal.class.cast(visit(ast.getLeft()).getValue()).compareTo(BigDecimal.class.cast(visit(ast.getRight()).getValue()));
+                // else if (visit(ast.getLeft()).getValue().getClass() == String.class)
+                //     compare = String.class.cast(visit(ast.getLeft()).getValue()).compareTo(String.class.cast(visit(ast.getRight()).getValue()));
+                // else if (visit(ast.getLeft()).getValue().getClass() == Character.class)
+                //     compare = Character.class.cast(visit(ast.getLeft()).getValue()).compareTo(Character.class.cast(visit(ast.getRight()).getValue()));
+                // else
+                //     throw new RuntimeException("Unsure of types");
 
                 switch (op) {
                     case "<":
@@ -224,20 +234,53 @@ public class Interpreter implements Ast.Visitor<Environment.PlcObject> {
 
         else if (op.equals("+")) {
             // String
-            if (visit(ast.getLeft()).getValue().getClass() == String.class || visit(ast.getLeft()).getValue().getClass() == String.class) {
-                // Concat String OR String + Int / Dec
-                // TODO
-            }
-            else if (visit(ast.getLeft()).getValue().getClass() == BigInteger.class && visit(ast.getLeft()).getValue().getClass() == visit(ast.getRight()).getValue().getClass()) {
-                BigInteger temp = BigInteger.class.cast(visit(ast.getLeft()).getValue()).add(BigInteger.class.cast(visit(ast.getRight()).getValue()));
-                return Environment.create(temp);
-            }
-            else if (visit(ast.getLeft()).getValue().getClass() == BigDecimal.class && visit(ast.getLeft()).getValue().getClass() == visit(ast.getRight()).getValue().getClass()) {
-                BigDecimal temp = BigDecimal.class.cast(visit(ast.getLeft()).getValue()).add(BigDecimal.class.cast(visit(ast.getRight()).getValue()));
-                return Environment.create(temp);
-            }
+            if (visit(ast.getLeft()).getValue().getClass() == String.class || visit(ast.getRight()).getValue().getClass() == String.class)
+                return Environment.create(visit(ast.getLeft()).getValue().toString() + visit(ast.getRight()).getValue().toString());
+            else if (visit(ast.getLeft()).getValue().getClass() == BigInteger.class && visit(ast.getLeft()).getValue().getClass() == visit(ast.getRight()).getValue().getClass())
+                return Environment.create(BigInteger.class.cast(visit(ast.getLeft()).getValue()).add(BigInteger.class.cast(visit(ast.getRight()).getValue())));
+            else if (visit(ast.getLeft()).getValue().getClass() == BigDecimal.class && visit(ast.getLeft()).getValue().getClass() == visit(ast.getRight()).getValue().getClass())
+                return Environment.create(BigDecimal.class.cast(visit(ast.getLeft()).getValue()).add(BigDecimal.class.cast(visit(ast.getRight()).getValue())));
             else
                 throw new RuntimeException("Wrong Concat types");
+        }
+
+        else if (op.equals("-") || op.equals("*")) {
+            // wow that's long
+            if ((visit(ast.getLeft()).getValue().getClass() == BigDecimal.class || visit(ast.getLeft()).getValue().getClass() == BigInteger.class) && visit(ast.getLeft()).getValue().getClass() == visit(ast.getRight()).getValue().getClass()) {
+                if (visit(ast.getLeft()).getValue().getClass() == BigInteger.class) {
+                    if (op.equals("*"))
+                        return Environment.create(BigInteger.class.cast(visit(ast.getLeft()).getValue()).multiply(BigInteger.class.cast(visit(ast.getRight()).getValue())));
+                    else
+                        return Environment.create(BigInteger.class.cast(visit(ast.getLeft()).getValue()).subtract(BigInteger.class.cast(visit(ast.getRight()).getValue())));
+                }
+                else if (visit(ast.getLeft()).getValue().getClass() == BigDecimal.class && visit(ast.getLeft()).getValue().getClass() == visit(ast.getRight()).getValue().getClass()) {
+                    if (op.equals("*"))
+                        return Environment.create(BigDecimal.class.cast(visit(ast.getLeft()).getValue()).multiply(BigDecimal.class.cast(visit(ast.getRight()).getValue())));
+                    else
+                        return Environment.create(BigDecimal.class.cast(visit(ast.getLeft()).getValue()).subtract(BigDecimal.class.cast(visit(ast.getRight()).getValue())));
+                }
+            }
+            else
+                throw new RuntimeException("Tried to - or * with wrong type");
+        }
+
+        else if (op.equals("/")) {
+            if ((visit(ast.getLeft()).getValue().getClass() == BigDecimal.class || visit(ast.getLeft()).getValue().getClass() == BigInteger.class) && visit(ast.getLeft()).getValue().getClass() == visit(ast.getRight()).getValue().getClass()) {
+                if (visit(ast.getLeft()).getValue().getClass() == BigInteger.class) {
+                    if (op.equals("*"))
+                        return Environment.create(BigInteger.class.cast(visit(ast.getLeft()).getValue()).multiply(BigInteger.class.cast(visit(ast.getRight()).getValue())));
+                    else
+                        return Environment.create(BigInteger.class.cast(visit(ast.getLeft()).getValue()).subtract(BigInteger.class.cast(visit(ast.getRight()).getValue())));
+                }
+                else if (visit(ast.getLeft()).getValue().getClass() == BigDecimal.class && visit(ast.getLeft()).getValue().getClass() == visit(ast.getRight()).getValue().getClass()) {
+                    if (op.equals("*"))
+                        return Environment.create(BigDecimal.class.cast(visit(ast.getLeft()).getValue()).multiply(BigDecimal.class.cast(visit(ast.getRight()).getValue())));
+                    else
+                        return Environment.create(BigDecimal.class.cast(visit(ast.getLeft()).getValue()).subtract(BigDecimal.class.cast(visit(ast.getRight()).getValue())));
+                }
+            }
+            else
+                throw new RuntimeException("Tried to - or * with wrong type");
         }
 
         throw new RuntimeException("Wrong types");
