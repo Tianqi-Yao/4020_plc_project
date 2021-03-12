@@ -78,8 +78,8 @@ public class Interpreter implements Ast.Visitor<Environment.PlcObject> {
                 scope = new Scope(scope);
                 Ast.Expr.Access temp = Ast.Expr.Access.class.cast(ast.getReceiver());
                 if (temp.getReceiver().isPresent()) {
-                    Ast.Expr.Access rec = Ast.Expr.Access.class.cast(temp.getReceiver().get());
-                    scope.lookupVariable(rec.getName()).getValue().setField(temp.getName(), visit(ast.getValue()));
+                    PlcObject rec = visit(temp.getReceiver().get());
+                    scope.lookupVariable(rec.getValue().toString()).getValue().setField(temp.getName(), visit(ast.getValue()));
                 }
                 else
                     scope.lookupVariable(temp.getName()).setValue(visit(ast.getValue()));
