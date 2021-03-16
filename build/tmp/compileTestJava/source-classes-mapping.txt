@@ -1,10 +1,10 @@
 plc/project/LexerTests.java
  plc.project.LexerTests
-plc/homework/RegexTests.java
- plc.homework.RegexTests
-plc/project/CharStreamTest.java
- plc.project.CharStreamTest
 plc/project/ParserTests.java
  plc.project.ParserTests
+plc/project/CharStreamTest.java
+ plc.project.CharStreamTest
+plc/homework/RegexTests.java
+ plc.homework.RegexTests
 plc/project/InterpreterTests.java
  plc.project.InterpreterTests

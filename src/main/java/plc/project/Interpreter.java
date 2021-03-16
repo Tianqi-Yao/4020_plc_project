@@ -2,7 +2,8 @@
 // University of Florida
 // COP4020 Spring 2021 Online
 
-// Current as of 3/11/2021
+// Current as of 3/15/2021
+// Updated Method, Assignment, and Source!
 
 package plc.project;
 
@@ -37,7 +38,14 @@ public class Interpreter implements Ast.Visitor<Environment.PlcObject> {
 
     @Override
     public Environment.PlcObject visit(Ast.Source ast) {
-        throw new UnsupportedOperationException(); //TODO
+        ast.getFields().forEach(f -> {
+            visit(f);
+        });
+        ast.getMethods().forEach(m -> {
+            visit(m);
+        });
+        List<PlcObject> args = new ArrayList<PlcObject>();
+        return scope.lookupFunction("main", 0).invoke(args);
     }
 
     @Override
@@ -52,7 +60,33 @@ public class Interpreter implements Ast.Visitor<Environment.PlcObject> {
 
     @Override
     public Environment.PlcObject visit(Ast.Method ast) {
-        throw new UnsupportedOperationException(); //TODO
+        // System.out.println(ast.getName());
+        // System.out.println(ast.getParameters());
+        // System.out.println(ast.getStatements());
+
+        scope.defineFunction(ast.getName(), ast.getParameters().size(), args -> {
+            try {
+                scope = new Scope(scope);
+                ast.getParameters().forEach( p -> {
+                    args.forEach(a -> {
+                        scope.defineVariable(p, a);
+                    });
+                });
+                ast.getStatements().forEach(s -> {
+                    visit(s);
+                });
+            } 
+            catch (Return r) {
+                return r.value;
+            }
+            finally {
+                scope = scope.getParent();
+            }
+            return Environment.NIL;
+        });
+        
+
+        return Environment.NIL;
     }
 
     @Override
@@ -79,10 +113,17 @@ public class Interpreter implements Ast.Visitor<Environment.PlcObject> {
                 Ast.Expr.Access temp = Ast.Expr.Access.class.cast(ast.getReceiver());
                 if (temp.getReceiver().isPresent()) {
                     PlcObject rec = visit(temp.getReceiver().get());
-                    scope.lookupVariable(rec.getValue().toString()).getValue().setField(temp.getName(), visit(ast.getValue()));
+                    // System.out.println(rec);
+                    // System.out.println(temp.getName());
+                    // System.out.println(rec.getField(temp.getName()));
+                    rec.setField(temp.getName(), visit(ast.getValue()));
                 }
-                else
+                else {
+                    // System.out.println(scope.lookupVariable(temp.getName()));
+                    // System.out.println(temp);
+                    // System.out.println(temp.getName());
                     scope.lookupVariable(temp.getName()).setValue(visit(ast.getValue()));
+                }
             } finally {
                 scope = scope.getParent();
             }
@@ -119,7 +160,28 @@ public class Interpreter implements Ast.Visitor<Environment.PlcObject> {
 
     @Override
     public Environment.PlcObject visit(Ast.Stmt.For ast) {
-        throw new UnsupportedOperationException(); //TODO
+        // System.out.println(ast.getName());
+        // System.out.println(ast.getStatements());
+        // System.out.println(ast.getValue());
+
+        Iterable iter = requireType(Iterable.class, visit(ast.getValue()));
+        iter.forEach( elem -> {
+            try {
+                scope = new Scope(scope);
+                // System.out.println(elem);
+                // System.out.println(elem.getClass());
+                // System.out.println(PlcObject.class.cast(elem).getValue());
+                // System.out.println(PlcObject.class.cast(elem).getValue().getClass()); 
+                scope.defineVariable(ast.getName(), PlcObject.class.cast(elem));
+                ast.getStatements().forEach( statement -> {
+                    visit(statement);
+                 });
+            } finally {
+                scope = scope.getParent();
+            }
+        });
+
+        return Environment.NIL;
     }
 
     @Override
@@ -235,6 +297,8 @@ public class Interpreter implements Ast.Visitor<Environment.PlcObject> {
         }
 
         else if (op.equals("-") || op.equals("*")) {
+            // System.out.println(visit(ast.getLeft()));
+            // System.out.println(visit(ast.getRight()));
             // wow that's long
             if ((visit(ast.getLeft()).getValue().getClass() == BigDecimal.class || visit(ast.getLeft()).getValue().getClass() == BigInteger.class) && visit(ast.getLeft()).getValue().getClass() == visit(ast.getRight()).getValue().getClass()) {
                 if (visit(ast.getLeft()).getValue().getClass() == BigInteger.class) {
@@ -287,7 +351,7 @@ public class Interpreter implements Ast.Visitor<Environment.PlcObject> {
             scope = new Scope(scope);
             List<Environment.PlcObject> args = new ArrayList<Environment.PlcObject>();
             for (int i = 0; i < ast.getArguments().size(); i++) {
-                args.add(Environment.create(ast.getArguments().get(i)));
+                args.add(visit(ast.getArguments().get(i)));
             }
             if (ast.getReceiver().isPresent()) {
                 PlcObject rec = visit(ast.getReceiver().get());
