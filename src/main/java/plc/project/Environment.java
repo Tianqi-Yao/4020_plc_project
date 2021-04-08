@@ -1,6 +1,7 @@
 package plc.project;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -83,6 +84,7 @@ public final class Environment {
             return "Type{" +
                     "name='" + name + '\'' +
                     ", jvmName='" + jvmName + '\'' +
+                    ", scope='" + scope + '\'' +
                     '}';
         }
 
@@ -131,8 +133,8 @@ public final class Environment {
         public String toString() {
             return "Object{" +
                     "type=" + type +
-                    ", scope=" + scope +
                     ", value=" + value +
+                    ", scope=" + scope +
                     '}';
         }
 
@@ -187,8 +189,9 @@ public final class Environment {
         @Override
         public String toString() {
             return "Variable{" +
-                    "type=" + type +
-                    ", name='" + name + '\'' +
+                    "name='" + name + '\'' +
+                    ", jvmName'" + jvmName + '\'' +
+                    ", type=" + type +
                     ", value=" + value +
                     '}';
         }
@@ -251,8 +254,8 @@ public final class Environment {
         public String toString() {
             return "Function{" +
                     "name='" + name + '\'' +
-                    ", arity=" + parameterTypes.size() +
                     ", jvmName='" + jvmName + '\'' +
+                    ", arity=" + parameterTypes.size() +
                     ", parameterTypes=" + parameterTypes +
                     ", returnType=" + returnType +
                     ", function=" + function +
@@ -271,6 +274,14 @@ public final class Environment {
         registerType(Type.DECIMAL);
         registerType(Type.CHARACTER);
         registerType(Type.STRING);
+        Type.ANY.scope.defineFunction("stringify", "toString", Arrays.asList(), Type.STRING, args -> Environment.NIL);
+        Type.COMPARABLE.scope.defineFunction("compare", "compareTo", Arrays.asList(Type.ANY, Type.COMPARABLE), Type.COMPARABLE, args -> Environment.NIL);
+        Type.INTEGER.scope.defineFunction("compare", "compareTo", Arrays.asList(Type.ANY, Type.INTEGER), Type.INTEGER, args -> Environment.NIL);
+        Type.DECIMAL.scope.defineFunction("compare", "compareTo", Arrays.asList(Type.ANY, Type.DECIMAL), Type.DECIMAL, args -> Environment.NIL);
+        Type.CHARACTER.scope.defineFunction("compare", "compareTo", Arrays.asList(Type.ANY, Type.CHARACTER), Type.CHARACTER, args -> Environment.NIL);
+        Type.STRING.scope.defineVariable("length", "length()", Type.INTEGER, Environment.NIL);
+        Type.STRING.scope.defineFunction("slice", "substring", Arrays.asList(Type.ANY, Type.INTEGER, Type.INTEGER), Type.STRING, args -> Environment.NIL);
+        Type.STRING.scope.defineFunction("compare", "compareTo", Arrays.asList(Type.ANY, Type.STRING), Type.STRING, args -> Environment.NIL);
     }
 
 }

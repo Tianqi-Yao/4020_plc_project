@@ -236,24 +236,18 @@ public final class Parser {
 
         if (peek(":")) {
             match(":");
-        } else {
-            if (tokens.has(0))
-                throw new ParseException("No : Operator" + " INDEX:" + tokens.get(0).getIndex(),
-                        tokens.get(0).getIndex());
-            else
-                throw new ParseException("No : Operator" + " INDEX:" + (parseExIndex(false)), parseExIndex(false));
-        }
 
-        // Type
-        if (peek(Token.Type.IDENTIFIER)) {
-            returnTypeName = tokens.get(0).getLiteral();
-            match(Token.Type.IDENTIFIER);
-        } else {
-            if (tokens.has(0))
-                throw new ParseException("No Type" + " INDEX:" + tokens.get(0).getIndex(),
-                        tokens.get(0).getIndex());
-            else
-                throw new ParseException("No Type" + " INDEX:" + (parseExIndex(false)), parseExIndex(false));
+            // Type
+            if (peek(Token.Type.IDENTIFIER)) {
+                returnTypeName = tokens.get(0).getLiteral();
+                match(Token.Type.IDENTIFIER);
+            } else {
+                if (tokens.has(0))
+                    throw new ParseException("No Type" + " INDEX:" + tokens.get(0).getIndex(),
+                            tokens.get(0).getIndex());
+                else
+                    throw new ParseException("No Type" + " INDEX:" + (parseExIndex(false)), parseExIndex(false));
+            }
         }
 
         if (peek("DO"))
@@ -363,24 +357,18 @@ public final class Parser {
 
         if (peek(":")) {
             match(":");
-        } else {
-            if (tokens.has(0))
-                throw new ParseException("No : Operator" + " INDEX:" + tokens.get(0).getIndex(),
-                        tokens.get(0).getIndex());
-            else
-                throw new ParseException("No : Operator" + " INDEX:" + (parseExIndex(false)), parseExIndex(false));
-        }
 
-        // Type
-        if (peek(Token.Type.IDENTIFIER)) {
-            typeName = tokens.get(0).getLiteral();
-            match(Token.Type.IDENTIFIER);
-        } else {
-            if (tokens.has(0))
-                throw new ParseException("No Type" + " INDEX:" + tokens.get(0).getIndex(),
-                        tokens.get(0).getIndex());
-            else
-                throw new ParseException("No Type" + " INDEX:" + (parseExIndex(false)), parseExIndex(false));
+            // Type
+            if (peek(Token.Type.IDENTIFIER)) {
+                typeName = tokens.get(0).getLiteral();
+                match(Token.Type.IDENTIFIER);
+            } else {
+                if (tokens.has(0))
+                    throw new ParseException("No Type" + " INDEX:" + tokens.get(0).getIndex(),
+                            tokens.get(0).getIndex());
+                else
+                    throw new ParseException("No Type" + " INDEX:" + (parseExIndex(false)), parseExIndex(false));
+            }
         }
 
         if (peek("=")) {
@@ -388,7 +376,10 @@ public final class Parser {
             Ast.Expr value = parseExpression();
             if (peek(";")) {
                 match(";");
-                return new Ast.Stmt.Declaration(name, Optional.of(typeName), Optional.of(value));
+                if (typeName.equals(""))
+                    return new Ast.Stmt.Declaration(name, Optional.empty(), Optional.of(value));
+                else
+                    return new Ast.Stmt.Declaration(name, Optional.of(typeName), Optional.of(value));
             } else {
                 if (tokens.has(0))
                     throw new ParseException("no ;" + " INDEX:" + tokens.get(0).getIndex(), tokens.get(0).getIndex());
@@ -398,7 +389,10 @@ public final class Parser {
         } else {
             if (peek(";")) {
                 match(";");
-                return new Ast.Stmt.Declaration(name, Optional.of(typeName), Optional.empty());
+                if (typeName.equals(""))
+                    return new Ast.Stmt.Declaration(name, Optional.empty(), Optional.empty());
+                else
+                    return new Ast.Stmt.Declaration(name, Optional.of(typeName), Optional.empty());
             } else {
                 if (tokens.has(0))
                     throw new ParseException("no ;" + " INDEX:" + tokens.get(0).getIndex(), tokens.get(0).getIndex());

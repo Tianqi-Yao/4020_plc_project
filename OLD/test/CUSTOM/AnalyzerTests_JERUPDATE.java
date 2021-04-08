@@ -10,6 +10,8 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
@@ -23,15 +25,12 @@ public final class AnalyzerTests {
     private static final Environment.Type OBJECT_TYPE = new Environment.Type("ObjectType", "ObjectType", init(new Scope(null), scope -> {
         scope.defineVariable("field", "field", Environment.Type.INTEGER, Environment.NIL);
         scope.defineFunction("method", "method", Arrays.asList(Environment.Type.ANY), Environment.Type.INTEGER, args -> Environment.NIL);
-//        scope.defineVariable("num", "num", Environment.Type.INTEGER, Environment.NIL);
     }));
 
     @ParameterizedTest(name = "{0}")
     @MethodSource
     public void testMethod(String test, Ast.Method ast, Ast.Method expected) {
-        Analyzer analyzer = test(ast, expected, init(new Scope(null), scope -> {
-            scope.defineVariable("num", "num", Environment.Type.INTEGER, Environment.NIL);
-        }));
+        Analyzer analyzer = test(ast, expected, new Scope(null));
         if (expected != null) {
             Assertions.assertEquals(expected.getFunction(), analyzer.scope.lookupFunction(expected.getName(), expected.getParameters().size()));
         }
@@ -157,6 +156,109 @@ public final class AnalyzerTests {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource
+    public void testWhileStatement(String test, Ast.Stmt.While ast, Ast.Stmt.While expected) {
+        test(ast, expected, new Scope(null));
+    }
+
+    private static Stream<Arguments> testWhileStatement() {
+        return Stream.of(
+                Arguments.of("Valid Condition",
+                        // WHILE TRUE DO print(1); END
+                        new Ast.Stmt.While(
+                                new Ast.Expr.Literal(Boolean.TRUE),
+                                Arrays.asList(new Ast.Stmt.Expression(
+                                        new Ast.Expr.Function(Optional.empty(), "print", Arrays.asList(
+                                                new Ast.Expr.Literal(BigInteger.ONE)
+                                        ))
+                                ))
+                        ),
+                        new Ast.Stmt.While(
+                                init(new Ast.Expr.Literal(Boolean.TRUE), ast -> ast.setType(Environment.Type.BOOLEAN)),
+                                Arrays.asList(new Ast.Stmt.Expression(
+                                        init(new Ast.Expr.Function(Optional.empty(), "print", Arrays.asList(
+                                                init(new Ast.Expr.Literal(BigInteger.ONE), ast -> ast.setType(Environment.Type.INTEGER))
+                                        )), ast -> ast.setFunction(new Environment.Function("print", "System.out.println", Arrays.asList(Environment.Type.ANY), Environment.Type.NIL, args -> Environment.NIL))))
+                                )
+                        )
+                ),
+                Arguments.of("Invalid Condition",
+                        // WHILE FALSE DO print(1); END
+                        new Ast.Stmt.While(
+                                new Ast.Expr.Literal("FALSE"),
+                                Arrays.asList(new Ast.Stmt.Expression(
+                                        new Ast.Expr.Function(Optional.empty(), "print", Arrays.asList(
+                                                new Ast.Expr.Literal(BigInteger.ONE)
+                                        ))
+                                ))
+                        ),
+                        null
+                ),
+                Arguments.of("Invalid Statement",
+                        // IF TRUE DO print(9223372036854775807); END
+                        new Ast.Stmt.While(
+                                new Ast.Expr.Literal(Boolean.TRUE),
+                                Arrays.asList(new Ast.Stmt.Expression(
+                                        new Ast.Expr.Function(Optional.empty(), "print", Arrays.asList(
+                                                new Ast.Expr.Literal(BigInteger.valueOf(Long.MAX_VALUE))
+                                        ))
+                                ))
+                        ),
+                        null
+                ),
+                Arguments.of("Empty Statements",
+                        // IF TRUE DO END
+                        new Ast.Stmt.While(
+                                new Ast.Expr.Literal(Boolean.TRUE),
+                                Arrays.asList()
+                        ),
+                        new Ast.Stmt.While(
+                                init(new Ast.Expr.Literal(Boolean.TRUE), ast -> ast.setType(Environment.Type.BOOLEAN)),
+                                Arrays.asList()
+                        )
+                ),
+                Arguments.of("Not Boolean",
+                        // IF TRUE DO END
+                        new Ast.Stmt.While(
+                                new Ast.Expr.Literal(5),
+                                Arrays.asList()
+                        ),
+                        null
+                )
+        );
+    }
+
+//    @ParameterizedTest(name = "{0}")
+//    @MethodSource
+//    public void testForStatement(String test, Ast.Stmt.For ast, Ast.Stmt.For expected) {
+//        test(ast, expected, new Scope(null));
+//    }
+//
+//    private static Stream<Arguments> testForStatement() {
+//        Scope scope = new Scope(null);
+//        scope.defineVariable("list", Environment.create(IntStream.range(0, 5)
+//                .mapToObj(i -> Environment.create(BigInteger.valueOf(i)))
+//                .collect(Collectors.toList())));
+//        return Stream.of(
+//                Arguments.of("Valid Condition",
+//                        // WHILE TRUE DO print(1); END
+//                        new Ast.Stmt.For("num",
+//                                new Ast.Expr.Access(Optional.empty(), "list"),
+//                                Arrays.asList(new Ast.Stmt.Expression(
+//                                        new Ast.Expr.Function(Optional.empty(), "print", Arrays.asList(
+//                                                Environment.get
+//                                        ))
+//                                ))
+//                        ),
+//                        new Ast.Stmt.For(
+//                                init(new Ast.Expr.Access(Optional.empty(), "num"), ast -> ast.setVariable(new Environment.Variable("num", "num", Environment.Type.INTEGER, Environment.NIL))),
+//
+//                        )
+//                )
+//        );
+//    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource
     public void testIfStatement(String test, Ast.Stmt.If ast, Ast.Stmt.If expected) {
         test(ast, expected, new Scope(null));
     }
@@ -243,6 +345,51 @@ public final class AnalyzerTests {
                 Arguments.of("Integer Invalid",
                         // 9223372036854775807
                         new Ast.Expr.Literal(BigInteger.valueOf(Long.MAX_VALUE)),
+                        null
+                ),
+                Arguments.of("Integer Valid Min",
+                        // 2147483647
+                        new Ast.Expr.Literal(BigInteger.valueOf(Integer.MIN_VALUE)),
+                        init(new Ast.Expr.Literal(BigInteger.valueOf(Integer.MIN_VALUE)), ast -> ast.setType(Environment.Type.INTEGER))
+                ),
+                Arguments.of("Integer Invalid Min",
+                        // 9223372036854775807
+                        new Ast.Expr.Literal(BigInteger.valueOf(Long.MIN_VALUE)),
+                        null
+                ),
+                Arguments.of("String",
+                        // 2147483647
+                        new Ast.Expr.Literal("Testing"),
+                        init(new Ast.Expr.Literal("Testing"), ast -> ast.setType(Environment.Type.STRING))
+                ),
+                Arguments.of("Character",
+                        // 2147483647
+                        new Ast.Expr.Literal('d'),
+                        init(new Ast.Expr.Literal('d'), ast -> ast.setType(Environment.Type.CHARACTER))
+                ),
+                Arguments.of("NIL",
+                        // 2147483647
+                        new Ast.Expr.Literal(Environment.NIL),
+                        init(new Ast.Expr.Literal(Environment.NIL), ast -> ast.setType(Environment.Type.NIL))
+                ),
+                Arguments.of("Decimal Valid",
+                        // 2147483647
+                        new Ast.Expr.Literal(BigDecimal.valueOf(Double.MAX_VALUE)),
+                        init(new Ast.Expr.Literal(BigDecimal.valueOf(Double.MAX_VALUE)), ast -> ast.setType(Environment.Type.DECIMAL))
+                ),
+                Arguments.of("Decimal Invalid",
+                        // 9223372036854775807
+                        new Ast.Expr.Literal(Double.MAX_VALUE + 1),
+                        null
+                ),
+                Arguments.of("Decimal Valid Min",
+                        // 2147483647
+                        new Ast.Expr.Literal(BigDecimal.valueOf(Double.MIN_VALUE)),
+                        init(new Ast.Expr.Literal(BigDecimal.valueOf(Double.MIN_VALUE)), ast -> ast.setType(Environment.Type.DECIMAL))
+                ),
+                Arguments.of("Decimal Invalid Min",
+                        // 9223372036854775807
+                        new Ast.Expr.Literal(Double.MIN_VALUE - 1),
                         null
                 )
         );

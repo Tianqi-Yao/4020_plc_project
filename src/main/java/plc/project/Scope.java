@@ -76,8 +76,8 @@ public final class Scope {
     public String toString() {
         return "Scope{" +
                 "parent=" + parent +
-                ", variables=" + variables +
-                ", functions=" + functions +
+                ", variables=" + variables.keySet() +
+                ", functions=" + functions.keySet() +
                 '}';
     }
 

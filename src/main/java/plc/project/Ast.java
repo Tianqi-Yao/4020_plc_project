@@ -481,12 +481,6 @@ public abstract class Ast {
             }
 
             @Override
-            public boolean equals(Object obj) {
-                return obj instanceof Literal &&
-                        Objects.equals(literal, ((Literal) obj).literal);
-            }
-
-            @Override
             public Environment.Type getType() {
                 if (type == null) {
                     throw new IllegalStateException("type is uninitialized");
@@ -496,6 +490,13 @@ public abstract class Ast {
 
             public void setType(Environment.Type type) {
                 this.type = type;
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                return obj instanceof Literal &&
+                        Objects.equals(literal, ((Literal) obj).literal) &&
+                        Objects.equals(type, ((Literal) obj).type);
             }
 
             @Override
@@ -535,14 +536,15 @@ public abstract class Ast {
             @Override
             public boolean equals(Object obj) {
                 return obj instanceof Group &&
-                        expression.equals(((Group) obj).expression);
+                        expression.equals(((Group) obj).expression) &&
+                        Objects.equals(type, ((Group) obj).type);
             }
 
             @Override
             public String toString() {
                 return "Ast.Expr.Group{" +
                         "expression=" + expression +
-                        ", type=" + getType() +
+                        ", type=" + type +
                         '}';
             }
 
@@ -590,7 +592,8 @@ public abstract class Ast {
                 return obj instanceof Binary &&
                         operator.equals(((Binary) obj).operator) &&
                         left.equals(((Binary) obj).left) &&
-                        right.equals(((Binary) obj).right);
+                        right.equals(((Binary) obj).right) &&
+                        Objects.equals(type, ((Binary) obj).type);
             }
 
             @Override

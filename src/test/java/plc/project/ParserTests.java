@@ -117,13 +117,11 @@ final class ParserTests {
                                 //LET name = expr;
                                 new Token(Token.Type.IDENTIFIER, "LET", 0),
                                 new Token(Token.Type.IDENTIFIER, "name", 4),
-                                new Token(Token.Type.OPERATOR, ":", 4),
-                                new Token(Token.Type.IDENTIFIER, "Integer", 4),
                                 new Token(Token.Type.OPERATOR, "=", 9),
                                 new Token(Token.Type.IDENTIFIER, "expr", 11),
                                 new Token(Token.Type.OPERATOR, ";", 15)
                         ),
-                        new Ast.Stmt.Declaration("name", Optional.of("Integer"), Optional.of(new Ast.Expr.Access(Optional.empty(), "expr")))
+                        new Ast.Stmt.Declaration("name", Optional.empty(), Optional.of(new Ast.Expr.Access(Optional.empty(), "expr")))
                 )
         );
     }
