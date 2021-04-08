@@ -59,7 +59,7 @@ public final class Analyzer implements Ast.Visitor<Void> {
             }
             
             if (!mainPresent) {
-                System.out.println("NO MAIN PRESENT!");
+                // System.out.println("NO MAIN PRESENT!");
                 throw new RuntimeException("No main method with proper arguments!");
             }
         } catch (RuntimeException r) {
@@ -330,12 +330,12 @@ public final class Analyzer implements Ast.Visitor<Void> {
                     ast.setType(Environment.Type.DECIMAL);
                 }
                 catch (RuntimeException r) {
-                    System.out.println("Decimal Out Range");
+                    // System.out.println("Decimal Out Range");
                     throw new RuntimeException("Decimal outside range");
                 }
             }
             else {
-                System.out.println("Type doesn't exist!");
+                // System.out.println("Type doesn't exist!");
                 throw new RuntimeException("Type doesn't exist");
             }
         } catch (RuntimeException r) {
@@ -353,12 +353,12 @@ public final class Analyzer implements Ast.Visitor<Void> {
             visit(ast.getExpression());
             try {
                 if (ast.getExpression().getClass() != Ast.Expr.Binary.class) {
-                    System.out.println("NOT BINARY TYPE!");
+                    // System.out.println("NOT BINARY TYPE!");
                     throw new RuntimeException("Not binary type!");
                 }
             }
             catch (RuntimeException r) {
-                System.out.println("NOT BINARY TYPE!");
+                // System.out.println("NOT BINARY TYPE!");
                 throw new RuntimeException("Not binary type!");
             }
         } catch (RuntimeException r) {
@@ -393,13 +393,13 @@ public final class Analyzer implements Ast.Visitor<Void> {
                 }
                 else if (ast.getLeft().getType() == Environment.Type.INTEGER || ast.getLeft().getType() == Environment.Type.DECIMAL) {
                     if (ast.getLeft().getType() != ast.getRight().getType()) {
-                        System.out.println("NOT RIGHT TYPES FOR +");
+                        // System.out.println("NOT RIGHT TYPES FOR +");
                         throw new RuntimeException("Not right types for +");
                     }
                     ast.setType(ast.getLeft().getType());
                 }
                 else {
-                    System.out.println("NOT RIGHT TYPES FOR +");
+                    // System.out.println("NOT RIGHT TYPES FOR +");
                     throw new RuntimeException("Not right types for +");
                 }
             }
@@ -407,18 +407,18 @@ public final class Analyzer implements Ast.Visitor<Void> {
             else if (op.equals("-") || op.equals("*") || op.equals("/")) {
                 if (ast.getLeft().getType() == Environment.Type.INTEGER || ast.getLeft().getType() == Environment.Type.DECIMAL) {
                     if (ast.getLeft().getType() != ast.getRight().getType()) {
-                        System.out.println("NOT RIGHT TYPES FOR *, -, /");
+                        // System.out.println("NOT RIGHT TYPES FOR *, -, /");
                         throw new RuntimeException("Not right types for *, -, /");
                     }
                     ast.setType(ast.getLeft().getType());
                 }
                 else {
-                    System.out.println("NOT RIGHT TYPES FOR *, -, /");
+                    // System.out.println("NOT RIGHT TYPES FOR *, -, /");
                     throw new RuntimeException("Not right types for *, -, /");
                 }
             }
             else {
-                System.out.println("HMMM HOW'D THIS HAPPEN");
+                // System.out.println("HMMM HOW'D THIS HAPPEN");
                 throw new RuntimeException("Not right types for Binary");
             }
         } catch (RuntimeException r) {
