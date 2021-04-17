@@ -142,7 +142,7 @@ public final class Analyzer implements Ast.Visitor<Void> {
         visit(ast.getExpression());
         try {
             if (ast.getExpression().getClass() != Ast.Expr.Function.class) {
-                System.out.println("NOT FUNCTION TYPE!");
+                // System.out.println("NOT FUNCTION TYPE!");
                 throw new RuntimeException("Not function type!");
             }
         }
@@ -179,7 +179,7 @@ public final class Analyzer implements Ast.Visitor<Void> {
     public Void visit(Ast.Stmt.Assignment ast) {
         try {
             if (ast.getReceiver().getClass() != Ast.Expr.Access.class) {
-                System.out.println("Not Access!");
+                // System.out.println("Not Access!");
                 throw new RuntimeException("Not Access!");
     
             }
@@ -199,7 +199,7 @@ public final class Analyzer implements Ast.Visitor<Void> {
     public Void visit(Ast.Stmt.If ast) {
         try {
             if (ast.getThenStatements().isEmpty()) {
-                System.out.println("No then statement!");
+                // System.out.println("No then statement!");
                 throw new RuntimeException("No then statement!");
             }
             visit(ast.getCondition());
@@ -236,7 +236,7 @@ public final class Analyzer implements Ast.Visitor<Void> {
     public Void visit(Ast.Stmt.For ast) {
         try {
             if (ast.getStatements().isEmpty()) {
-                System.out.println("No statements!");
+                // System.out.println("No statements!");
                 throw new RuntimeException("No statements!");
             }
             visit(ast.getValue());
@@ -318,7 +318,7 @@ public final class Analyzer implements Ast.Visitor<Void> {
                     ast.setType(Environment.Type.INTEGER);
                 }
                 catch (RuntimeException r) {
-                    System.out.println("Int Out Range");
+                    // System.out.println("Int Out Range");
                     throw new RuntimeException("Integer outside range");
                 }
             }
@@ -491,7 +491,7 @@ public final class Analyzer implements Ast.Visitor<Void> {
     public static void requireAssignable(Environment.Type target, Environment.Type type) {
         try {
             if (target != type && target != Environment.Type.ANY && target != Environment.Type.COMPARABLE) {
-                System.out.println("REQUIRE ASSIGNABLE - target: " + target + " type: " + type);
+                // System.out.println("REQUIRE ASSIGNABLE - target: " + target + " type: " + type);
                 throw new RuntimeException("Not matching types!");
             }
         } catch (RuntimeException r) {
