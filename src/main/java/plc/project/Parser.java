@@ -267,7 +267,12 @@ public final class Parser {
 
         if (peek("END")) {
             match("END");
-            return new Ast.Method(name, parameters, parameterTypeNames, Optional.of(returnTypeName), statements);
+            if (returnTypeName.equals("")) {
+                return new Ast.Method(name, parameters, parameterTypeNames, Optional.empty(), statements);
+            }
+            else {
+                return new Ast.Method(name, parameters, parameterTypeNames, Optional.of(returnTypeName), statements);
+            }
         } else {
             if (tokens.has(0))
                 throw new ParseException("no END" + " INDEX:" + tokens.get(0).getIndex(), tokens.get(0).getIndex());
