@@ -24,6 +24,7 @@ public final class AnalyzerTests_JERUPDATE {
 
     private static final Environment.Type OBJECT_TYPE = new Environment.Type("ObjectType", "ObjectType", init(new Scope(null), scope -> {
         scope.defineVariable("field", "field", Environment.Type.INTEGER, Environment.NIL);
+        scope.defineVariable("x", "x", Environment.Type.INTEGER, Environment.NIL);
         scope.defineFunction("method", "method", Arrays.asList(Environment.Type.ANY), Environment.Type.INTEGER, args -> Environment.NIL);
     }));
 
@@ -44,11 +45,14 @@ public final class AnalyzerTests_JERUPDATE {
      */
     private static Stream<Arguments> testMethod() {
         return Stream.of(
-                Arguments.of("Hello World",
+                Arguments.of("XXXXX",
                         // DEF main(): Integer DO print("Hello, World!"); END
                         new Ast.Method("main", Arrays.asList(), Arrays.asList(), Optional.of("Integer"), Arrays.asList(
                                 new Ast.Stmt.Expression(new Ast.Expr.Function(Optional.empty(), "print", Arrays.asList(
-                                        new Ast.Expr.Literal("Hello, World!")
+                                        new Ast.Expr.Binary("+",
+                                                new Ast.Expr.Access(Optional.empty(), "num"),
+                                                new Ast.Expr.Literal(BigInteger.ONE)
+                                        )
                                 )))
                         )),
                         init(new Ast.Method("main", Arrays.asList(), Arrays.asList(), Optional.of("Integer"), Arrays.asList(
@@ -60,6 +64,16 @@ public final class AnalyzerTests_JERUPDATE {
                 Arguments.of("Return Type Mismatch",
                         // DEF increment(num: Integer): Decimal DO RETURN num + 1; END
                         new Ast.Method("increment", Arrays.asList("num"), Arrays.asList("Integer"), Optional.of("Decimal"), Arrays.asList(
+                                new Ast.Stmt.Return(new Ast.Expr.Binary("+",
+                                        new Ast.Expr.Access(Optional.empty(), "num"),
+                                        new Ast.Expr.Literal(BigInteger.ONE)
+                                ))
+                        )),
+                        null
+                ),
+                Arguments.of("Return Type Mismatch",
+                        // DEF increment(num: Integer): Decimal DO RETURN num + 1; END
+                        new Ast.Method("increment", Arrays.asList("num"), Arrays.asList("Integer"), Optional.of("Integer"), Arrays.asList(
                                 new Ast.Stmt.Return(new Ast.Expr.Binary("+",
                                         new Ast.Expr.Access(Optional.empty(), "num"),
                                         new Ast.Expr.Literal(BigInteger.ONE)

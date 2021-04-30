@@ -52,6 +52,39 @@ public class GeneratorTests {
                                 "",
                                 "}"
                         )
+                ),
+                Arguments.of("Mult Fields!",
+//                        LET x: Integer;
+//                        LET y: Decimal;
+//                        LET z: String;
+//                        DEF f(): Integer DO RETURN x; END
+//                        DEF g(): Decimal DO RETURN y; END
+//                        DEF h(): String DO RETURN z; END
+//                        DEF main(): Integer DO END
+                        new Ast.Source(
+//                                Arrays.asList(init(new Ast.Field("x", "Integer", Arrays.asList(), Optional.of("Integer")))),
+                                Arrays.asList(
+                                        new Ast.Field("x", "Integer", Optional.empty()),
+                                        new Ast.Field("y", "Decimal", Optional.empty()),
+                                        new Ast.Field("z", "String", Optional.empty())),
+                                Arrays.asList(
+                                        init(new Ast.Method("f", Arrays.asList(), Arrays.asList(), Optional.of("Integer"), Arrays.asList(new Ast.Stmt.Return(new Ast.Expr.Access(Optional.empty(), "x")))), ast -> ast.setFunction(new Environment.Function("f", "f", Arrays.asList(), Environment.Type.INTEGER, args -> Environment.NIL)))
+                                )
+                        ),
+                        String.join(System.lineSeparator(),
+                                "public class Main {",
+                                "",
+                                "    public static void main(String[] args) {",
+                                "        System.exit(new Main().main());",
+                                "    }",
+                                "",
+                                "    int main() {",
+                                "        System.out.println(\"Hello, World!\");",
+                                "        return 0;",
+                                "    }",
+                                "",
+                                "}"
+                        )
                 )
         );
     }

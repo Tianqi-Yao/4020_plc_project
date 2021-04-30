@@ -2,7 +2,7 @@
 // University of Florida
 // COP4020 Spring 2021 Online
 
-// Current as of 4/17/2021
+// Current as of 4/28/2021
 
 package plc.project;
 
@@ -41,9 +41,13 @@ public final class Generator implements Ast.Visitor<Void> {
         print("public class Main {");
         indent++;
         newline(0); // blank line
-        for (int i = 0; i < ast.getFields().size(); i++) {
-            print(ast.getFields().get(i));
-            newline(indent);
+
+        if (!ast.getFields().isEmpty()) {
+            for (int i = 0; i < ast.getFields().size(); i++) {
+                newline(indent);
+                print(ast.getFields().get(i));
+            }
+            newline(0); // blank line
         }
 
         // Java main method
@@ -72,11 +76,28 @@ public final class Generator implements Ast.Visitor<Void> {
 
     @Override
     public Void visit(Ast.Field ast) {
-        print(ast.getTypeName());
+
+        // Print Java type name
+        if (ast.getTypeName().equals("Integer")) {
+            print("int");
+        }
+        else if (ast.getTypeName().equals("Decimal")) {
+            print("double");
+        }
+        else if (ast.getTypeName().equals("Boolean")) {
+            print("boolean");
+        }
+        else if (ast.getTypeName().equals("Character")) {
+            print("char");
+        }
+        else if (ast.getTypeName().equals("String")) {
+            print("String");
+        }
+
         print(" ");
         print(ast.getName());
         if (ast.getValue().isPresent()) {
-            print("= ");
+            print(" = ");
             print(ast.getValue().get());
         }
         print(";");

@@ -88,7 +88,7 @@ public class LexerTests {
                 Arguments.of("Newline Escape", "\"Hello,\\nWorld\"", true),
                 Arguments.of("Unterminated", "\"unterminated", false),
                 Arguments.of("Invalid Escape", "\"invalid\\escape\"", false),
-                Arguments.of("Newline Unterminated", "\"unterminated␊\"", false)
+                Arguments.of("Newline Unterminated", "\"unterminated\"", false)
         );
     }
 

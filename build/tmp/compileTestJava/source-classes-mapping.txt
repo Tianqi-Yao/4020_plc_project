@@ -4,13 +4,13 @@ plc/project/ParserTests.java
  plc.project.ParserTests
 plc/project/CharStreamTest.java
  plc.project.CharStreamTest
-plc/homework/RegexTests.java
- plc.homework.RegexTests
-plc/project/InterpreterTests.java
- plc.project.InterpreterTests
 plc/project/AnalyzerTests.java
  plc.project.AnalyzerTests
-plc/project/AnalyzerTests_JERUPDATE.java
- plc.project.AnalyzerTests_JERUPDATE
+plc/project/InterpreterTests.java
+ plc.project.InterpreterTests
+plc/homework/RegexTests.java
+ plc.homework.RegexTests
 plc/project/GeneratorTests.java
  plc.project.GeneratorTests
+plc/project/AnalyzerTests_JERUPDATE.java
+ plc.project.AnalyzerTests_JERUPDATE
